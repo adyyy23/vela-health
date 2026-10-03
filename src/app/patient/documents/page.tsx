@@ -1,0 +1,116 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { PatientDocument } from "@/types";
+import { FileText, Download, ShieldCheck, Calendar, ChevronRight, X } from "lucide-react";
+
+export default function PatientDocumentsPage() {
+  const [documents, setDocuments] = useState<PatientDocument[]>([]);
+  const [selectedDoc, setSelectedDoc] = useState<PatientDocument | null>(null);
+
+  useEffect(() => {
+    // In our seed, patient usr-patient-1 has 2 documents
+    setDocuments([
+      {
+        id: "doc-1",
+        patientId: "usr-patient-1",
+        title: "Dermatology Visit Summary & Care Plan",
+        docType: "VISIT_SUMMARY",
+        filePathOrSummary:
+          "CLINICAL VISIT SUMMARY\n\nAttending: Dr. Elena Reyes, MD (CA-MD-892147)\nDate of Encounter: October 2026\nFacility: Vela Central Pavilion, Suite 800\n\nSUBJECTIVE:\nPatient presents with pruritic localized erythema on the left volar forearm for 10 days.\n\nOBJECTIVE:\nCutaneous exam reveals mild localized eczematous plaque with subtle micro-vesiculation. Dermoscopic evaluation confirms benign contact dermatitis.\n\nASSESSMENT & PLAN:\n1. Contact dermatitis, unspecified etiology.\n2. Prescribed Desonide 0.05% ointment. Apply BID x14d.\n3. Patient educated on barrier restoration using fragrance-free ceramide emollients.\n4. Follow-up in 2-4 weeks as needed.",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "doc-2",
+        patientId: "usr-patient-1",
+        title: "Official e-Prescription — Desonide 0.05% Ointment",
+        docType: "PRESCRIPTION",
+        filePathOrSummary:
+          "ELECTRONIC PRESCRIPTION ORDER\n\nRx ID: #991048-CA\nPatient: Maria Clara Santos (DOB: 1995-04-18)\nPrescriber: Dr. Elena Reyes, MD\nDEA / NPI: 8921471029\n\nMEDICATION:\nDesonide 0.05% Topical Ointment (15g)\nSig: Apply thin film to affected forearm areas twice daily for 14 days\nRefills Authorized: 1\nDispensed To: Walgreens Pharmacy #0214, SF CA",
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-5 p-4 sm:p-5">
+      <div>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block">
+          Medical Records
+        </span>
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          Patient Documents
+        </h1>
+        <p className="text-xs text-slate-500 mt-1">
+          Secure, authenticated clinical summaries, prescriptions, and lab orders.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {documents.map((doc) => (
+          <div
+            key={doc.id}
+            onClick={() => setSelectedDoc(doc)}
+            className="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 transition cursor-pointer flex items-center justify-between gap-3 group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-bold text-xs text-slate-900 group-hover:text-sky-700 transition">
+                  {doc.title}
+                </h4>
+                <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                  <span className="font-semibold text-sky-600">
+                    {doc.docType.replace("_", " ")}
+                  </span>
+                  <span>•</span>
+                  <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+
+            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition" />
+          </div>
+        ))}
+      </div>
+
+      {/* DOCUMENT PREVIEW MODAL */}
+      {selectedDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-bubble p-6 max-w-lg w-full max-h-[85vh] flex flex-col shadow-floating border border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-sky-600" />
+                <h3 className="font-bold text-sm text-slate-900">{selectedDoc.title}</h3>
+              </div>
+              <button
+                onClick={() => setSelectedDoc(null)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto my-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">
+              {selectedDoc.filePathOrSummary}
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-[11px] text-slate-400">Digitally signed & encrypted</span>
+              <button
+                onClick={() => alert("Downloading secure document PDF...")}
+                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export PDF</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
