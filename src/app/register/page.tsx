@@ -42,20 +42,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#EDF3F8]">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F5F7F5] text-vela-ink">
       <div className="mb-6">
         <Link href="/">
           <VelaLogo size="lg" />
         </Link>
       </div>
 
-      <div className="bg-white rounded-bubble p-6 sm:p-10 border border-slate-200/90 shadow-bubble max-w-md w-full">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E2E8E4] shadow-sm max-w-md w-full">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-vela-ink tracking-tight">
             Create Patient Account
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Access digital check-ins, records, and clinician messaging.
+          <p className="text-xs text-vela-muted mt-1">
+            Access digital check-ins, medical records, and clinician messaging.
           </p>
         </div>
 
@@ -69,54 +69,54 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-3.5">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">First Name</label>
+              <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">First Name</label>
               <input
                 type="text"
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="Maria"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Last Name</label>
+              <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Last Name</label>
               <input
                 type="text"
                 required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Santos"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Email Address</label>
+            <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="maria.santos@example.com"
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Phone Number</label>
+            <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Phone Number</label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+1 (415) 555-0142"
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Create Password</label>
+            <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Create Password</label>
             <input
               type="password"
               required
@@ -124,23 +124,23 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 mt-2"
+            className="w-full py-3 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 mt-2"
           >
             {loading ? "Creating Account..." : "Register Account"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+        <div className="mt-6 pt-4 border-t border-[#E2E8E4] text-center text-xs text-vela-muted">
           <span>Already registered? </span>
-          <Link href="/login" className="font-bold text-sky-600 hover:text-sky-700">
+          <Link href="/login" className="font-bold text-vela-sage hover:text-vela-sageDark">
             Sign In
           </Link>
         </div>

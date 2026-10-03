@@ -54,37 +54,37 @@ export default function AdminAuditPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
+    <div className="flex flex-col gap-6 text-vela-ink">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-sky-600 block mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-vela-sage block mb-1">
               Security Compliance
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-vela-ink tracking-tight">
               Administrative Audit Log
             </h1>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-vela-muted mt-1">
               Immutable logging of all privilege changes, digital check-ins, and consultation updates.
             </p>
           </div>
 
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+            <Search className="w-4 h-4 text-vela-muted absolute left-3.5 top-3 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search audit trail..."
-              className="w-full pl-10 pr-4 py-2 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-bubble border border-slate-200/90 shadow-bubble overflow-hidden">
+      <div className="bg-white rounded-3xl border border-[#E2E8E4] shadow-sm overflow-hidden">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-bold text-[10px] tracking-wider">
+          <thead className="bg-[#F7F9F7] border-b border-[#E2E8E4] text-vela-muted uppercase font-bold text-[10px] tracking-wider">
             <tr>
               <th className="px-5 py-3.5">Actor / User</th>
               <th className="px-5 py-3.5">Action Executed</th>
@@ -94,21 +94,21 @@ export default function AdminAuditPage() {
               <th className="px-5 py-3.5">IP Address</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
+          <tbody className="divide-y divide-[#E2E8E4] text-vela-ink">
             {filtered.map((l) => (
-              <tr key={l.id} className="hover:bg-slate-50/60 transition">
-                <td className="px-5 py-3.5 font-bold text-slate-900">{l.userName}</td>
+              <tr key={l.id} className="hover:bg-[#F7F9F7]/70 transition">
+                <td className="px-5 py-3.5 font-bold text-vela-ink">{l.userName}</td>
                 <td className="px-5 py-3.5">
-                  <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200">
+                  <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EFF2EF] text-vela-ink border border-[#E2E8E4]">
                     {l.action}
                   </span>
                 </td>
-                <td className="px-5 py-3.5 font-mono text-[11px] text-sky-700">{l.resource}</td>
-                <td className="px-5 py-3.5 max-w-xs">{l.details}</td>
-                <td className="px-5 py-3.5 text-slate-500 font-mono text-[11px]">
+                <td className="px-5 py-3.5 font-mono text-[11px] text-vela-forest font-semibold">{l.resource}</td>
+                <td className="px-5 py-3.5 max-w-xs text-vela-muted">{l.details}</td>
+                <td className="px-5 py-3.5 text-vela-muted font-mono text-[11px]">
                   {new Date(l.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </td>
-                <td className="px-5 py-3.5 font-mono text-slate-400 text-[11px]">{l.ipAddress}</td>
+                <td className="px-5 py-3.5 font-mono text-vela-muted text-[11px]">{l.ipAddress}</td>
               </tr>
             ))}
           </tbody>

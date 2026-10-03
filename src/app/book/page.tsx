@@ -127,7 +127,7 @@ function BookingFlowContent() {
           particleCount: 80,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#0284C7", "#38BDF8", "#059669", "#FFFFFF"],
+          colors: ["#3B6B55", "#1B3629", "#0D9488", "#FFFFFF"],
         });
       } catch (e) {
         // Safe fallback
@@ -141,7 +141,6 @@ function BookingFlowContent() {
 
     // If user is not logged in, auto-login as patient demo or register
     if (!currentUser) {
-      // Login with demo patient or register guest
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -174,6 +173,22 @@ function BookingFlowContent() {
       if (!data.success) {
         setErrorMsg(data.error || "Unable to complete booking. Please choose another slot.");
       } else {
+        const rescheduleId = searchParams.get("reschedule");
+        if (rescheduleId) {
+          try {
+            await fetch(`/api/appointments/${rescheduleId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                status: "CANCELLED",
+                note: `Rescheduled to new booking`,
+              }),
+            });
+          } catch (err) {
+            console.error("Error cancelling rescheduled appointment", err);
+          }
+        }
+
         setConfirmationData({
           appointmentId: data.appointmentId,
           referenceNo: `VELA-${Math.floor(10000 + Math.random() * 90000)}`,
@@ -189,7 +204,6 @@ function BookingFlowContent() {
 
   const handleJoinWaitlist = async () => {
     try {
-      // Auto login demo patient if guest
       if (!currentUser) {
         await fetch("/api/auth/login", {
           method: "POST",
@@ -215,16 +229,16 @@ function BookingFlowContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EDF3F8]">
+    <div className="min-h-screen flex flex-col bg-[#F5F7F5] text-vela-ink">
       <PublicNavbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
+      <main className="max-w-4xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 w-full">
         {/* Progress Tracker */}
         {currentStep < 10 && (
           <div className="mb-6">
-            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-2">
+            <div className="flex items-center justify-between text-xs text-vela-muted font-semibold mb-2">
               <span>Step {currentStep} of 9</span>
-              <span className="text-slate-800">
+              <span className="text-vela-forest font-bold">
                 {currentStep === 1 && "Care Need"}
                 {currentStep === 2 && "Select Clinician"}
                 {currentStep === 3 && "Facility Location"}
@@ -236,9 +250,9 @@ function BookingFlowContent() {
                 {currentStep === 9 && "Review & Schedule"}
               </span>
             </div>
-            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E2E8E4] h-2 rounded-full overflow-hidden">
               <div
-                className="bg-sky-600 h-full rounded-full transition-all duration-300"
+                className="bg-vela-sage h-full rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / 9) * 100}%` }}
               />
             </div>
@@ -246,7 +260,16 @@ function BookingFlowContent() {
         )}
 
         {/* Step Container Surface */}
-        <div className="bg-white rounded-bubble p-6 sm:p-10 border border-slate-200/90 shadow-bubble">
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E2E8E4] shadow-sm">
+          {searchParams.get("reschedule") && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2">
+              <Sparkles className="w-4 h-4 shrink-0 text-amber-600" />
+              <span>
+                <strong>Rescheduling Mode:</strong> Selecting a new date and time will automatically update and replace your existing appointment.
+              </span>
+            </div>
+          )}
+
           {errorMsg && (
             <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
@@ -257,13 +280,13 @@ function BookingFlowContent() {
           {/* STEP 1: What care do you need? */}
           {currentStep === 1 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 1 • Care Requirement
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 What clinical care do you need?
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Choose the clinical focus area that best matches your health goals.
               </p>
 
@@ -282,14 +305,14 @@ function BookingFlowContent() {
                       setSelectedSpecialty(item.id);
                       setCurrentStep(2);
                     }}
-                    className={`p-4 rounded-3xl border text-left transition ${
+                    className={`p-4 rounded-2xl border text-left transition ${
                       selectedSpecialty === item.id
-                        ? "bg-sky-50 border-sky-500 ring-2 ring-sky-200/60"
-                        : "bg-slate-50 hover:bg-slate-100/80 border-slate-200/80"
+                        ? "bg-[#EFF2EF] border-vela-sage ring-2 ring-vela-sage/20"
+                        : "bg-[#F7F9F7] hover:bg-[#EFF2EF] border-[#E2E8E4]"
                     }`}
                   >
-                    <h4 className="font-bold text-sm text-slate-900">{item.title}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
+                    <h4 className="font-bold text-sm text-vela-ink">{item.title}</h4>
+                    <p className="text-xs text-vela-muted mt-0.5">{item.desc}</p>
                   </button>
                 ))}
               </div>
@@ -299,13 +322,13 @@ function BookingFlowContent() {
           {/* STEP 2: Select Doctor */}
           {currentStep === 2 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 2 • Specialist
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Select your physician
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Showing verified practitioners affiliated with your selected specialty.
               </p>
 
@@ -318,31 +341,40 @@ function BookingFlowContent() {
                       if (doc.clinicId) setSelectedClinicId(doc.clinicId);
                       setCurrentStep(3);
                     }}
-                    className={`p-4 rounded-3xl border text-left flex items-start gap-3.5 transition ${
+                    className={`p-4 rounded-2xl border text-left flex items-start gap-3.5 transition ${
                       selectedDoctorId === doc.userId
-                        ? "bg-sky-50 border-sky-500 ring-2 ring-sky-200/60"
-                        : "bg-slate-50 hover:bg-slate-100/80 border-slate-200/80"
+                        ? "bg-[#EFF2EF] border-vela-sage ring-2 ring-vela-sage/20"
+                        : "bg-[#F7F9F7] hover:bg-[#EFF2EF] border-[#E2E8E4]"
                     }`}
                   >
                     <img
                       src={doc.user?.avatarUrl}
                       alt={doc.user?.firstName}
-                      className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shrink-0"
+                      className="w-14 h-14 rounded-xl object-cover border border-[#E2E8E4] shrink-0"
                     />
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-sm text-slate-900">
+                        <h4 className="font-bold text-sm text-vela-ink">
                           Dr. {doc.user?.firstName} {doc.user?.lastName}
                         </h4>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-sky-600" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-vela-sage" />
                       </div>
-                      <span className="text-xs text-sky-600 font-semibold block">{doc.specialtyName}</span>
-                      <span className="text-[11px] text-slate-500 block mt-1">
+                      <span className="text-xs text-vela-sage font-semibold block">{doc.specialtyName}</span>
+                      <span className="text-[11px] text-vela-muted block mt-1">
                         Fee: ${doc.consultationFee} • {doc.experienceYears}y exp
                       </span>
                     </div>
                   </button>
                 ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-[#E2E8E4]">
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
+                >
+                  ← Back to Care Need
+                </button>
               </div>
             </div>
           )}
@@ -350,13 +382,13 @@ function BookingFlowContent() {
           {/* STEP 3: Select Clinic */}
           {currentStep === 3 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 3 • Facility
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Select clinic location
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Choose a connected San Francisco facility for your records and check-in.
               </p>
 
@@ -368,22 +400,31 @@ function BookingFlowContent() {
                       setSelectedClinicId(clinic.id);
                       setCurrentStep(4);
                     }}
-                    className={`p-4 rounded-3xl border text-left transition ${
+                    className={`p-4 rounded-2xl border text-left transition ${
                       selectedClinicId === clinic.id
-                        ? "bg-sky-50 border-sky-500 ring-2 ring-sky-200/60"
-                        : "bg-slate-50 hover:bg-slate-100/80 border-slate-200/80"
+                        ? "bg-[#EFF2EF] border-vela-sage ring-2 ring-vela-sage/20"
+                        : "bg-[#F7F9F7] hover:bg-[#EFF2EF] border-[#E2E8E4]"
                     }`}
                   >
-                    <h4 className="font-bold text-sm text-slate-900">{clinic.name}</h4>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                    <h4 className="font-bold text-sm text-vela-ink">{clinic.name}</h4>
+                    <p className="text-xs text-vela-muted mt-1 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-vela-sage shrink-0" />
                       <span>{clinic.address}</span>
                     </p>
-                    <span className="text-[11px] text-emerald-700 font-bold block mt-2">
+                    <span className="text-[11px] text-vela-forest font-bold block mt-2">
                       Open Today • Validated Parking Available
                     </span>
                   </button>
                 ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-[#E2E8E4]">
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
+                >
+                  ← Back to Specialists
+                </button>
               </div>
             </div>
           )}
@@ -391,13 +432,13 @@ function BookingFlowContent() {
           {/* STEP 4: In-Person / Telehealth */}
           {currentStep === 4 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 4 • Consultation Type
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 How would you like to consult?
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Both options include prescription handling and full clinical notes.
               </p>
 
@@ -407,17 +448,17 @@ function BookingFlowContent() {
                     setConsultationType("IN_PERSON");
                     setCurrentStep(5);
                   }}
-                  className={`p-5 rounded-3xl border text-left transition ${
+                  className={`p-5 rounded-2xl border text-left transition ${
                     consultationType === "IN_PERSON"
-                      ? "bg-sky-50 border-sky-500 ring-2 ring-sky-200/60"
-                      : "bg-slate-50 hover:bg-slate-100/80 border-slate-200/80"
+                      ? "bg-[#EFF2EF] border-vela-sage ring-2 ring-vela-sage/20"
+                      : "bg-[#F7F9F7] hover:bg-[#EFF2EF] border-[#E2E8E4]"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-sky-600 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-[#E2E8E4] flex items-center justify-center text-vela-sage mb-3">
                     <Building2 className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">In-Person Clinic Visit</h4>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <h4 className="font-bold text-sm text-vela-ink">In-Person Clinic Visit</h4>
+                  <p className="text-xs text-vela-muted mt-1">
                     Visit {selectedClinic?.name}. Includes digital check-in on your phone upon arrival.
                   </p>
                 </button>
@@ -427,19 +468,28 @@ function BookingFlowContent() {
                     setConsultationType("TELEHEALTH");
                     setCurrentStep(5);
                   }}
-                  className={`p-5 rounded-3xl border text-left transition ${
+                  className={`p-5 rounded-2xl border text-left transition ${
                     consultationType === "TELEHEALTH"
-                      ? "bg-sky-50 border-sky-500 ring-2 ring-sky-200/60"
-                      : "bg-slate-50 hover:bg-slate-100/80 border-slate-200/80"
+                      ? "bg-[#EFF2EF] border-vela-sage ring-2 ring-vela-sage/20"
+                      : "bg-[#F7F9F7] hover:bg-[#EFF2EF] border-[#E2E8E4]"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-sky-600 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-[#E2E8E4] flex items-center justify-center text-vela-sage mb-3">
                     <Video className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Encrypted Telehealth</h4>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <h4 className="font-bold text-sm text-vela-ink">Encrypted Telehealth</h4>
+                  <p className="text-xs text-vela-muted mt-1">
                     Direct HD video consultation in your browser. Join with 1 click from your appointment screen.
                   </p>
+                </button>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-[#E2E8E4]">
+                <button
+                  onClick={() => setCurrentStep(3)}
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
+                >
+                  ← Back to Location
                 </button>
               </div>
             </div>
@@ -448,13 +498,13 @@ function BookingFlowContent() {
           {/* STEP 5: Choose Date */}
           {currentStep === 5 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 5 • Date
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Select appointment date
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Pick an upcoming weekday. Real availability is checked dynamically.
               </p>
 
@@ -464,20 +514,20 @@ function BookingFlowContent() {
                   value={selectedDate}
                   min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-4 py-3 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-sm font-bold text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
                 />
               </div>
 
               <div className="mt-8 flex items-center justify-between">
                 <button
                   onClick={() => setCurrentStep(4)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setCurrentStep(6)}
-                  className="px-6 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-sm transition"
+                  className="px-6 py-2.5 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-semibold text-xs shadow-sm transition"
                 >
                   Continue to Timeslots →
                 </button>
@@ -485,32 +535,32 @@ function BookingFlowContent() {
             </div>
           )}
 
-          {/* STEP 6: Choose Available Time (Smart Scheduling Logic) */}
+          {/* STEP 6: Choose Available Time */}
           {currentStep === 6 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 6 • Time Slot
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Choose available time
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Available slots for Dr. {selectedDoctor?.user?.lastName} on {selectedDate}.
               </p>
 
               {loadingSlots ? (
-                <div className="py-12 text-center text-xs text-slate-400">
+                <div className="py-12 text-center text-xs text-vela-muted">
                   Checking clinician calendar and blocked slots...
                 </div>
               ) : availableSlots.length === 0 ? (
-                <div className="p-6 rounded-3xl bg-amber-50 border border-amber-200 text-center">
-                  <p className="text-xs text-amber-800 font-semibold mb-3">
+                <div className="p-6 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] text-center">
+                  <p className="text-xs text-amber-900 font-semibold mb-3">
                     No open appointment slots remaining on this date.
                   </p>
                   {!waitlistSuccess ? (
                     <button
                       onClick={handleJoinWaitlist}
-                      className="px-5 py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm transition inline-flex items-center gap-1.5"
+                      className="px-5 py-2.5 rounded-2xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-sm transition inline-flex items-center gap-1.5"
                     >
                       <Hourglass className="w-3.5 h-3.5" />
                       <span>Join Priority Waitlist</span>
@@ -530,10 +580,10 @@ function BookingFlowContent() {
                         setSelectedSlot(slot);
                         setCurrentStep(7);
                       }}
-                      className={`py-3 px-4 rounded-2xl text-xs font-bold transition border ${
+                      className={`py-3 px-4 rounded-xl text-xs font-bold transition border ${
                         selectedSlot === slot
-                          ? "bg-sky-600 text-white border-sky-600 shadow-md"
-                          : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200/80"
+                          ? "bg-vela-sage text-white border-vela-sage shadow-sm"
+                          : "bg-[#F7F9F7] hover:bg-[#EFF2EF] text-vela-ink border-[#E2E8E4]"
                       }`}
                     >
                       {slot}
@@ -541,19 +591,28 @@ function BookingFlowContent() {
                   ))}
                 </div>
               )}
+
+              <div className="mt-8 flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentStep(5)}
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
+                >
+                  ← Back to Date
+                </button>
+              </div>
             </div>
           )}
 
           {/* STEP 7: Reason for Visit */}
           {currentStep === 7 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 7 • Reason
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Reason for your visit
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Briefly describe symptoms or questions so your clinician can prepare.
               </p>
 
@@ -562,19 +621,19 @@ function BookingFlowContent() {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="E.g., Following up on skin redness on left arm, experiencing mild itching for 4 days..."
-                className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full p-4 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
 
               <div className="mt-8 flex items-center justify-between">
                 <button
                   onClick={() => setCurrentStep(6)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setCurrentStep(8)}
-                  className="px-6 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-sm transition"
+                  className="px-6 py-2.5 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-semibold text-xs shadow-sm transition"
                 >
                   Next: Patient Details →
                 </button>
@@ -585,19 +644,19 @@ function BookingFlowContent() {
           {/* STEP 8: Confirm Patient Information */}
           {currentStep === 8 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 8 • Patient Information
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Confirm your contact details
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Used to issue your reference token, digital check-in alerts, and visit summary.
               </p>
 
               <div className="space-y-4 max-w-lg">
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+                  <label className="text-[11px] font-bold uppercase text-vela-muted block mb-1">
                     Full Legal Name
                   </label>
                   <input
@@ -605,12 +664,12 @@ function BookingFlowContent() {
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     placeholder="Maria Santos"
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+                  <label className="text-[11px] font-bold uppercase text-vela-muted block mb-1">
                     Email Address
                   </label>
                   <input
@@ -618,12 +677,12 @@ function BookingFlowContent() {
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                     placeholder="patient@velahealth.com"
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+                  <label className="text-[11px] font-bold uppercase text-vela-muted block mb-1">
                     Mobile Phone (For Check-In SMS & Verification)
                   </label>
                   <input
@@ -631,7 +690,7 @@ function BookingFlowContent() {
                     value={guestPhone}
                     onChange={(e) => setGuestPhone(e.target.value)}
                     placeholder="+1 (415) 555-0142"
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
                   />
                 </div>
               </div>
@@ -639,13 +698,13 @@ function BookingFlowContent() {
               <div className="mt-8 flex items-center justify-between">
                 <button
                   onClick={() => setCurrentStep(7)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setCurrentStep(9)}
-                  className="px-6 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-sm transition"
+                  className="px-6 py-2.5 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-semibold text-xs shadow-sm transition"
                 >
                   Next: Review Booking →
                 </button>
@@ -656,47 +715,47 @@ function BookingFlowContent() {
           {/* STEP 9: Review & Confirm */}
           {currentStep === 9 && (
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Step 9 • Review
               </span>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-vela-ink tracking-tight">
                 Review appointment details
               </h2>
-              <p className="text-xs text-slate-500 mt-1 mb-6">
+              <p className="text-xs text-vela-muted mt-1 mb-6">
                 Please verify all items before finalizing your appointment reservation.
               </p>
 
-              <div className="bg-slate-50 rounded-3xl p-5 border border-slate-200/80 mb-6 space-y-3 text-xs">
+              <div className="bg-[#F7F9F7] rounded-2xl p-5 border border-[#E2E8E4] mb-6 space-y-3 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Clinician:</span>
-                  <span className="font-bold text-slate-900">
+                  <span className="text-vela-muted">Clinician:</span>
+                  <span className="font-bold text-vela-ink">
                     Dr. {selectedDoctor?.user?.firstName} {selectedDoctor?.user?.lastName}, MD
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Facility:</span>
-                  <span className="font-semibold text-slate-800">{selectedClinic?.name}</span>
+                  <span className="text-vela-muted">Facility:</span>
+                  <span className="font-semibold text-vela-ink">{selectedClinic?.name}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Format:</span>
-                  <span className="font-semibold text-sky-700">
+                  <span className="text-vela-muted">Format:</span>
+                  <span className="font-semibold text-vela-forest">
                     {consultationType === "IN_PERSON" ? "In-Person Clinic Visit" : "Encrypted Telehealth Video"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Schedule:</span>
-                  <span className="font-bold text-slate-900">
+                  <span className="text-vela-muted">Schedule:</span>
+                  <span className="font-bold text-vela-ink">
                     {selectedDate} at {selectedSlot || "10:30"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Consultation Fee:</span>
-                  <span className="font-extrabold text-slate-900">${selectedDoctor?.consultationFee}</span>
+                  <span className="text-vela-muted">Consultation Fee:</span>
+                  <span className="font-extrabold text-vela-forest">${selectedDoctor?.consultationFee}</span>
                 </div>
                 {reason && (
-                  <div className="pt-2 border-t border-slate-200">
-                    <span className="text-slate-500 block mb-1">Patient Reason:</span>
-                    <p className="text-slate-800 italic">{reason}</p>
+                  <div className="pt-2 border-t border-[#E2E8E4]">
+                    <span className="text-vela-muted block mb-1">Patient Reason:</span>
+                    <p className="text-vela-ink italic">{reason}</p>
                   </div>
                 )}
               </div>
@@ -704,14 +763,14 @@ function BookingFlowContent() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => setCurrentStep(8)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="px-4 py-2 text-xs font-semibold text-vela-muted hover:text-vela-ink transition"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleConfirmBooking}
                   disabled={submitting}
-                  className="px-8 py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md transition flex items-center gap-2"
+                  className="px-8 py-3.5 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-sm shadow-sm transition flex items-center gap-2"
                 >
                   {submitting ? (
                     <span>Confirming...</span>
@@ -729,33 +788,33 @@ function BookingFlowContent() {
           {/* STEP 10: Confirmed (Success Celebration Screen) */}
           {currentStep === 10 && confirmationData && (
             <div className="text-center py-6">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-200 shadow-sm">
+              <div className="w-16 h-16 rounded-3xl bg-[#EAF0EC] text-emerald-800 flex items-center justify-center mx-auto mb-4 border border-emerald-200 shadow-sm">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
 
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
                 Booking Confirmed
               </span>
-              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+              <h2 className="text-3xl font-extrabold text-vela-ink tracking-tight mt-1">
                 You are on the schedule!
               </h2>
 
-              <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto">
-                Reference Number: <strong className="text-slate-900">{confirmationData.referenceNo}</strong>
+              <p className="text-xs text-vela-muted mt-2 max-w-sm mx-auto">
+                Reference Number: <strong className="text-vela-ink">{confirmationData.referenceNo}</strong>
               </p>
 
               {/* Status Timeline */}
-              <div className="my-8 max-w-md mx-auto bg-slate-50 p-5 rounded-3xl border border-slate-200/80 text-left">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-3">
+              <div className="my-8 max-w-md mx-auto bg-[#F7F9F7] p-5 rounded-2xl border border-[#E2E8E4] text-left">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-vela-muted block mb-3">
                   Live Appointment Status
                 </span>
                 <div className="flex items-center justify-between text-xs font-semibold">
-                  <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                     <span>Confirmed</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-300" />
-                  <div className="text-slate-500">Upcoming</div>
+                  <div className="text-vela-muted">Upcoming</div>
                   <ChevronRight className="w-4 h-4 text-slate-300" />
                   <div className="text-slate-400">Digital Check-In</div>
                   <ChevronRight className="w-4 h-4 text-slate-300" />
@@ -766,13 +825,13 @@ function BookingFlowContent() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   href="/patient"
-                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition"
+                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-sm transition"
                 >
                   View in Patient App
                 </Link>
                 <Link
                   href="/"
-                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition"
+                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#EFF2EF] hover:bg-[#E2E8E4] text-vela-ink font-semibold text-xs transition"
                 >
                   Return to Home
                 </Link>
@@ -789,7 +848,7 @@ export default function BookingFlowPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#EDF3F8] flex items-center justify-center text-xs text-slate-400">
+        <div className="min-h-screen bg-[#F5F7F5] flex items-center justify-center text-xs text-vela-muted">
           Loading booking flow...
         </div>
       }

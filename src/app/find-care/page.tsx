@@ -11,7 +11,6 @@ import {
   Clock,
   Phone,
   Calendar,
-  Layers,
   List,
   Map as MapIcon,
   ChevronRight,
@@ -25,7 +24,7 @@ import {
 const CareMap = dynamic(() => import("@/components/CareMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
+    <div className="w-full h-full flex items-center justify-center bg-[#EFF2EF] text-vela-muted text-xs">
       Loading interactive care map...
     </div>
   ),
@@ -65,22 +64,22 @@ export default function FindCarePage() {
   });
 
   return (
-    <div className="h-screen flex flex-col bg-[#EDF3F8] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#F5F7F5] text-vela-ink overflow-hidden">
       <PublicNavbar />
 
       <main className="flex-1 relative flex overflow-hidden">
         {/* TOP FLOATING SEARCH & FILTER BAR */}
         <div className="absolute top-4 inset-x-4 sm:inset-x-8 z-20 pointer-events-none flex justify-center">
-          <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-[0_12px_36px_rgba(15,23,42,0.12)] p-2 sm:px-4 sm:py-2.5 flex flex-wrap items-center justify-between gap-3 max-w-5xl w-full">
+          <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-[#E2E8E4] shadow-sm p-2 sm:px-4 sm:py-2.5 flex flex-wrap items-center justify-between gap-3 max-w-5xl w-full">
             {/* Search */}
             <div className="flex-1 min-w-[220px] relative flex items-center">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+              <Search className="w-4 h-4 text-vela-muted absolute left-3 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search clinics, neighborhood, or address..."
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
 
@@ -90,31 +89,31 @@ export default function FindCarePage() {
                 onClick={() => setFilterTodayOnly(!filterTodayOnly)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
                   filterTodayOnly
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    ? "bg-[#EFF2EF] text-vela-forest border-[#CBD7CE]"
+                    : "bg-[#F7F9F7] text-vela-muted border-[#E2E8E4] hover:bg-[#EFF2EF]"
                 }`}
               >
                 Available Today
               </button>
 
               {/* View Toggle */}
-              <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200/60">
+              <div className="bg-[#EFF2EF] p-1 rounded-xl flex items-center border border-[#E2E8E4]">
                 <button
                   onClick={() => setViewMode("MAP")}
                   className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold transition ${
-                    viewMode === "MAP" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    viewMode === "MAP" ? "bg-white text-vela-ink shadow-sm" : "text-vela-muted hover:text-vela-ink"
                   }`}
                 >
-                  <MapIcon className="w-3.5 h-3.5" />
+                  <MapIcon className="w-3.5 h-3.5 text-vela-sage" />
                   <span>Map</span>
                 </button>
                 <button
                   onClick={() => setViewMode("LIST")}
                   className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold transition ${
-                    viewMode === "LIST" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    viewMode === "LIST" ? "bg-white text-vela-ink shadow-sm" : "text-vela-muted hover:text-vela-ink"
                   }`}
                 >
-                  <List className="w-3.5 h-3.5" />
+                  <List className="w-3.5 h-3.5 text-vela-sage" />
                   <span>List</span>
                 </button>
               </div>
@@ -132,47 +131,47 @@ export default function FindCarePage() {
               className="w-full h-full"
             />
 
-            {/* FLOATING CLINIC PREVIEW BUBBLE (Reference Image Inspiration) */}
+            {/* FLOATING CLINIC PREVIEW BUBBLE */}
             {selectedClinic && (
               <div className="absolute bottom-6 inset-x-4 sm:left-8 sm:right-auto sm:w-[420px] z-30 pointer-events-auto animate-sheet-up">
-                <div className="bg-white rounded-bubble p-5 border border-slate-200/90 shadow-floating relative">
+                <div className="bg-white rounded-3xl p-5 border border-[#E2E8E4] shadow-lg relative">
                   <button
                     onClick={() => setSelectedClinic(null)}
-                    className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                    className="absolute top-4 right-4 p-1.5 rounded-full text-vela-muted hover:text-vela-ink hover:bg-[#EFF2EF] transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
 
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-vela-forest uppercase tracking-wider">
                       Open Today • Walk-ins & Appointments
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-slate-900">{selectedClinic.name}</h3>
-                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                  <h3 className="text-lg font-bold text-vela-ink">{selectedClinic.name}</h3>
+                  <p className="text-xs text-vela-muted flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-vela-sage shrink-0" />
                     <span>{selectedClinic.address}, {selectedClinic.city}</span>
                   </p>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs bg-[#F7F9F7] p-3 rounded-2xl border border-[#E2E8E4]">
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">Hours</span>
-                      <span className="font-semibold text-slate-700 truncate block">
+                      <span className="text-[10px] text-vela-muted uppercase font-semibold block">Hours</span>
+                      <span className="font-semibold text-vela-ink truncate block">
                         {selectedClinic.operatingHours.split("|")[0]}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">Next Open Slot</span>
-                      <span className="font-bold text-sky-700 block">{selectedClinic.nextAvailableSlot}</span>
+                      <span className="text-[10px] text-vela-muted uppercase font-semibold block">Next Open Slot</span>
+                      <span className="font-bold text-vela-forest block">{selectedClinic.nextAvailableSlot}</span>
                     </div>
                   </div>
 
                   <div className="mt-4 flex items-center gap-2">
                     <Link
                       href={`/clinics/${selectedClinic.id}`}
-                      className="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold text-center transition flex items-center justify-center gap-1"
+                      className="flex-1 py-2.5 rounded-2xl bg-[#EFF2EF] hover:bg-[#E2E8E4] text-vela-ink text-xs font-semibold text-center transition flex items-center justify-center gap-1"
                     >
                       <span>Facility Info</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -180,7 +179,7 @@ export default function FindCarePage() {
 
                     <Link
                       href={`/book?clinicId=${selectedClinic.id}`}
-                      className="flex-1 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold text-center shadow-sm transition flex items-center justify-center gap-1"
+                      className="flex-1 py-2.5 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white text-xs font-semibold text-center shadow-sm transition flex items-center justify-center gap-1"
                     >
                       <Calendar className="w-3.5 h-3.5" />
                       <span>Book at Clinic</span>
@@ -195,7 +194,7 @@ export default function FindCarePage() {
         {/* LIST VIEW */}
         {viewMode === "LIST" && (
           <div className="w-full h-full overflow-y-auto pt-24 pb-12 px-4 sm:px-8 max-w-5xl mx-auto">
-            <h2 className="text-xl font-bold text-slate-900 mb-4">
+            <h2 className="text-xl font-bold text-vela-ink mb-4">
               San Francisco Clinics ({filteredClinics.length})
             </h2>
 
@@ -203,43 +202,43 @@ export default function FindCarePage() {
               {filteredClinics.map((clinic) => (
                 <div
                   key={clinic.id}
-                  className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                  className="bg-white rounded-3xl p-5 border border-[#E2E8E4] shadow-sm hover:shadow-md transition flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="font-bold text-slate-900 text-base">{clinic.name}</h3>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <h3 className="font-bold text-vela-ink text-base">{clinic.name}</h3>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF2EF] text-vela-forest border border-[#E2E8E4]">
                         Open
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-500 flex items-start gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-vela-muted flex items-start gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-vela-sage shrink-0 mt-0.5" />
                       <span>{clinic.address}, {clinic.city}, {clinic.state} {clinic.postalCode}</span>
                     </p>
 
-                    <div className="mt-3 flex flex-col gap-1 text-xs text-slate-600 bg-slate-50 p-3 rounded-2xl">
+                    <div className="mt-3 flex flex-col gap-1 text-xs text-vela-muted bg-[#F7F9F7] p-3 rounded-2xl border border-[#E2E8E4]">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{clinic.operatingHours}</span>
+                        <Clock className="w-3.5 h-3.5 text-vela-sage" />
+                        <span className="text-vela-ink font-medium">{clinic.operatingHours}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{clinic.phone}</span>
+                        <Phone className="w-3.5 h-3.5 text-vela-sage" />
+                        <span className="text-vela-ink font-medium">{clinic.phone}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                  <div className="mt-4 pt-3 border-t border-[#E2E8E4] flex items-center gap-2">
                     <Link
                       href={`/clinics/${clinic.id}`}
-                      className="flex-1 py-2 text-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition"
+                      className="flex-1 py-2.5 text-center rounded-xl bg-[#EFF2EF] hover:bg-[#E2E8E4] text-vela-ink text-xs font-semibold transition"
                     >
                       View Profile
                     </Link>
                     <Link
                       href={`/book?clinicId=${clinic.id}`}
-                      className="flex-1 py-2 text-center rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-sm transition"
+                      className="flex-1 py-2.5 text-center rounded-xl bg-vela-sage hover:bg-vela-sageDark text-white text-xs font-semibold shadow-sm transition"
                     >
                       Book Visit
                     </Link>

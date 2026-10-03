@@ -33,65 +33,65 @@ export default async function DoctorProfilePage({
   const clinic = doctor.clinicId ? getClinicById(doctor.clinicId) : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EDF3F8]">
+    <div className="min-h-screen flex flex-col bg-vela-canvas text-vela-ink">
       <PublicNavbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
         {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-xs text-slate-500">
-          <Link href="/" className="hover:text-slate-900">Home</Link>
+        <div className="mb-6 flex items-center gap-2 text-xs text-vela-muted">
+          <Link href="/" className="hover:text-vela-ink">Home</Link>
           <span>/</span>
-          <Link href="/doctors" className="hover:text-slate-900">Doctors</Link>
+          <Link href="/doctors" className="hover:text-vela-ink">Doctors</Link>
           <span>/</span>
-          <span className="text-slate-900 font-semibold">Dr. {doctor.user?.firstName} {doctor.user?.lastName}</span>
+          <span className="text-vela-ink font-semibold">Dr. {doctor.user?.firstName} {doctor.user?.lastName}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Info (Col 8) */}
           <div className="lg:col-span-8 flex flex-col gap-6">
             {/* Header Card */}
-            <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
+            <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 <img
                   src={doctor.user?.avatarUrl}
                   alt={doctor.user?.firstName}
-                  className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover border-2 border-slate-200 shadow-sm"
+                  className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-2 border-[#E2E8E4] shadow-sm"
                 />
 
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                    <span className="px-2.5 py-0.5 rounded-pill text-[11px] font-bold bg-[#EAF0EC] text-vela-forest border border-vela-sage/30">
                       {doctor.specialtyName}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                    <span className="px-2.5 py-0.5 rounded-pill text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                       <span>Verified License: {doctor.licenseNumber}</span>
                     </span>
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-vela-ink tracking-tight">
                     Dr. {doctor.user?.firstName} {doctor.user?.lastName}, MD
                   </h1>
 
-                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                  <p className="text-xs text-vela-muted mt-1 flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-vela-muted" />
                     <span>Affiliated with <strong>{doctor.clinicName || "Vela Central Pavilion"}</strong></span>
                   </p>
 
                   <div className="mt-4 flex flex-wrap items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1 font-bold text-slate-900">
+                    <div className="flex items-center gap-1 font-bold text-vela-ink">
                       <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                       <span>{doctor.rating}</span>
-                      <span className="text-slate-400 font-normal">({doctor.reviewCount} patient reviews)</span>
+                      <span className="text-vela-muted font-normal">({doctor.reviewCount} patient reviews)</span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-slate-600">
-                      <Award className="w-4 h-4 text-sky-600" />
+                    <div className="flex items-center gap-1 text-vela-muted">
+                      <Award className="w-4 h-4 text-vela-sage" />
                       <span>{doctor.experienceYears} Years Clinical Practice</span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-slate-600">
-                      <Languages className="w-4 h-4 text-sky-600" />
+                    <div className="flex items-center gap-1 text-vela-muted">
+                      <Languages className="w-4 h-4 text-vela-sage" />
                       <span>{doctor.languages.join(", ")}</span>
                     </div>
                   </div>
@@ -100,36 +100,36 @@ export default async function DoctorProfilePage({
             </div>
 
             {/* Biography & Approach */}
-            <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-3">
+            <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
+              <h2 className="text-lg font-bold text-vela-ink tracking-tight mb-3">
                 Physician Biography & Clinical Approach
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed font-normal">
+              <p className="text-sm text-vela-muted leading-relaxed font-normal">
                 {doctor.bio}
               </p>
 
-              <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+              <div className="mt-6 pt-6 border-t border-[#E2E8E4] grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-vela-muted block mb-1">
                     Care Delivery Formats
                   </span>
-                  <div className="flex flex-col gap-1.5 text-xs text-slate-700">
+                  <div className="flex flex-col gap-1.5 text-xs text-vela-ink">
                     <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-sky-600" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-vela-sage" />
                       <span>In-Person Consultations at {doctor.clinicName}</span>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Video className="w-3.5 h-3.5 text-sky-600" />
+                      <Video className="w-3.5 h-3.5 text-vela-sage" />
                       <span>Secure Telehealth Video Appointments</span>
                     </span>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                <div className="p-4 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-vela-muted block mb-1">
                     Practice Standards
                   </span>
-                  <div className="flex flex-col gap-1.5 text-xs text-slate-700">
+                  <div className="flex flex-col gap-1.5 text-xs text-vela-ink">
                     <span className="flex items-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Verified CA Medical Board Licensure</span>
@@ -144,29 +144,29 @@ export default async function DoctorProfilePage({
             </div>
 
             {/* Clinical Services & Pricing */}
-            <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-4">
+            <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
+              <h2 className="text-lg font-bold text-vela-ink tracking-tight mb-4">
                 Available Consultation Services
               </h2>
               <div className="flex flex-col gap-3">
                 {doctor.services.map((srv) => (
                   <div
                     key={srv.id}
-                    className="p-4 rounded-2xl bg-slate-50 hover:bg-sky-50/50 border border-slate-200/80 transition flex items-center justify-between gap-4"
+                    className="p-4 rounded-button bg-vela-surfaceSubtle hover:bg-[#EAF0EC] border border-[#E2E8E4] transition flex items-center justify-between gap-4"
                   >
                     <div>
-                      <h4 className="font-bold text-sm text-slate-900">{srv.name}</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">{srv.description}</p>
-                      <span className="text-[11px] text-slate-400 mt-1 inline-block">
+                      <h4 className="font-bold text-sm text-vela-ink">{srv.name}</h4>
+                      <p className="text-xs text-vela-muted mt-0.5">{srv.description}</p>
+                      <span className="text-[11px] text-vela-muted mt-1 inline-block">
                         Duration: {srv.durationMinutes} minutes
                       </span>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="text-base font-extrabold text-slate-900">${srv.standardFee}</span>
+                      <span className="text-base font-extrabold text-vela-ink">${srv.standardFee}</span>
                       <Link
                         href={`/book?doctorId=${doctor.userId}&serviceId=${srv.id}`}
-                        className="block mt-1 text-xs font-semibold text-sky-600 hover:text-sky-700"
+                        className="block mt-1 text-xs font-semibold text-vela-sage hover:text-vela-sageDark"
                       >
                         Select & Book →
                       </Link>
@@ -177,33 +177,33 @@ export default async function DoctorProfilePage({
             </div>
 
             {/* Patient Reviews */}
-            <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
+            <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                  <h2 className="text-lg font-bold text-vela-ink tracking-tight">
                     Verified Patient Feedback
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-vela-muted mt-0.5">
                     Reviews can only be submitted following a completed consultation.
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="flex items-center gap-1 font-bold text-slate-900">
+                  <div className="flex items-center gap-1 font-bold text-vela-ink">
                     <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                     <span className="text-base">{doctor.rating}</span>
                   </div>
-                  <span className="text-[10px] text-slate-400">Average Rating</span>
+                  <span className="text-[10px] text-vela-muted">Average Rating</span>
                 </div>
               </div>
 
               {doctor.reviews.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No public reviews submitted yet.</p>
+                <p className="text-xs text-vela-muted italic">No public reviews submitted yet.</p>
               ) : (
                 <div className="flex flex-col gap-4">
                   {doctor.reviews.map((rev) => (
-                    <div key={rev.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60">
+                    <div key={rev.id} className="p-4 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4]">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-slate-900">{rev.patientName}</span>
+                        <span className="text-xs font-bold text-vela-ink">{rev.patientName}</span>
                         <div className="flex items-center gap-0.5">
                           {[...Array(5)].map((_, i) => (
                             <Star
@@ -215,8 +215,8 @@ export default async function DoctorProfilePage({
                           ))}
                         </div>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">{rev.comment}</p>
-                      <span className="text-[10px] text-slate-400 mt-2 block">
+                      <p className="text-xs text-vela-muted leading-relaxed">{rev.comment}</p>
+                      <span className="text-[10px] text-vela-muted mt-2 block">
                         Verified Consultation • {new Date(rev.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
                     </div>
@@ -228,37 +228,37 @@ export default async function DoctorProfilePage({
 
           {/* Sticky Booking Card (Col 4) */}
           <div className="lg:col-span-4 sticky top-24 flex flex-col gap-4">
-            <div className="bg-white rounded-bubble p-6 border border-slate-200/90 shadow-bubble">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 block mb-1">
+            <div className="bg-white rounded-card p-6 border border-[#E2E8E4] shadow-sm">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-vela-sage block mb-1">
                 Direct Appointment Booking
               </span>
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              <h3 className="text-xl font-extrabold text-vela-ink tracking-tight">
                 Schedule with Dr. {doctor.user?.lastName}
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-vela-muted mt-1">
                 Standard Consultation: <strong>${doctor.consultationFee}</strong>
               </p>
 
-              <hr className="my-4 border-slate-100" />
+              <hr className="my-4 border-[#E2E8E4]" />
 
-              <div className="space-y-3 mb-6 text-xs text-slate-700">
+              <div className="space-y-3 mb-6 text-xs text-vela-ink">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Next Opening:</span>
+                  <span className="text-vela-muted">Next Opening:</span>
                   <span className="font-bold text-emerald-600">Today at 2:30 PM</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Facility:</span>
-                  <span className="font-semibold text-slate-800">{doctor.clinicName}</span>
+                  <span className="text-vela-muted">Facility:</span>
+                  <span className="font-semibold text-vela-ink">{doctor.clinicName}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Cancellation:</span>
-                  <span className="text-slate-600">Free up to 2 hours before</span>
+                  <span className="text-vela-muted">Cancellation:</span>
+                  <span className="text-vela-muted">Free up to 2 hours before</span>
                 </div>
               </div>
 
               <Link
                 href={`/book?doctorId=${doctor.userId}`}
-                className="w-full py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 mb-2.5"
+                className="w-full py-3.5 rounded-button bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 mb-2.5"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Book Appointment Now</span>
@@ -266,7 +266,7 @@ export default async function DoctorProfilePage({
 
               <Link
                 href={`/book?doctorId=${doctor.userId}&waitlist=true`}
-                className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition text-center block"
+                className="w-full py-2.5 rounded-button bg-vela-surfaceSubtle hover:bg-[#EAF0EC] text-vela-ink font-semibold text-xs transition text-center block"
               >
                 Join Cancellation Waitlist
               </Link>
@@ -274,18 +274,18 @@ export default async function DoctorProfilePage({
 
             {/* Clinic Info Preview Card */}
             {clinic && (
-              <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+              <div className="bg-white rounded-card p-5 border border-[#E2E8E4] shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-vela-muted block mb-1">
                   Primary Clinic Location
                 </span>
-                <h4 className="font-bold text-slate-900 text-sm">{clinic.name}</h4>
-                <p className="text-xs text-slate-500 mt-1 flex items-start gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5" />
+                <h4 className="font-bold text-vela-ink text-sm">{clinic.name}</h4>
+                <p className="text-xs text-vela-muted mt-1 flex items-start gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-vela-sage shrink-0 mt-0.5" />
                   <span>{clinic.address}, {clinic.city}</span>
                 </p>
-                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500">{clinic.phone}</span>
-                  <Link href={`/clinics/${clinic.id}`} className="font-semibold text-sky-600 hover:text-sky-700">
+                <div className="mt-3 pt-3 border-t border-[#E2E8E4] flex items-center justify-between text-xs">
+                  <span className="text-vela-muted">{clinic.phone}</span>
+                  <Link href={`/clinics/${clinic.id}`} className="font-semibold text-vela-sage hover:text-vela-sageDark">
                     Clinic Details →
                   </Link>
                 </div>

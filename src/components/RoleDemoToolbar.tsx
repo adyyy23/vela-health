@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { UserCheck, Stethoscope, Shield, Globe, RefreshCw, Smartphone, Monitor } from "lucide-react";
+import { UserCheck, Stethoscope, Shield, Globe, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function RoleDemoToolbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // Default collapsed to stay unobtrusive
 
   const switchAccount = async (email: string, password: string, targetPath: string) => {
     try {
@@ -41,84 +41,99 @@ export default function RoleDemoToolbar() {
     }
   };
 
+  const currentRole = pathname.startsWith("/patient")
+    ? "Patient (Maria)"
+    : pathname.startsWith("/doctor")
+    ? "Doctor (Dr. Reyes)"
+    : pathname.startsWith("/admin")
+    ? "Admin (Ops)"
+    : "Public Guest";
+
   return (
     <aside
-      aria-label="Role Switcher"
-      className="fixed bottom-4 left-4 z-[999] font-sans transition-all duration-300 pointer-events-auto"
+      aria-label="Demo Role Switcher"
+      className="fixed bottom-3 right-3 z-[999] font-sans pointer-events-auto select-none"
     >
-      <div
-        className={`bg-slate-900/90 backdrop-blur-md text-white border border-slate-700/80 rounded-2xl shadow-2xl transition-all duration-200 ${
-          collapsed ? "p-2" : "p-3 sm:px-4"
-        }`}
-      >
-        <div className="flex items-center justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-xs font-semibold tracking-wide text-slate-200">
-              Demo Environment & Role Switcher
-            </span>
-          </div>
+      <div className="bg-[#17231D]/95 backdrop-blur-md text-white border border-slate-700/60 rounded-xl shadow-xl transition-all duration-200">
+        {collapsed ? (
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="text-[11px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-slate-800"
+            onClick={() => setCollapsed(false)}
+            className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-semibold hover:text-emerald-200 transition"
           >
-            {collapsed ? "Expand" : "Minimize"}
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-slate-300">Role:</span>
+            <span className="text-white font-bold">{currentRole}</span>
+            <ChevronUp className="w-3.5 h-3.5 text-slate-400 ml-1" />
           </button>
-        </div>
+        ) : (
+          <div className="p-3 max-w-sm">
+            <div className="flex items-center justify-between gap-3 mb-2 border-b border-slate-700/60 pb-1.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Switch Demo Role</span>
+              </div>
+              <button
+                onClick={() => setCollapsed(true)}
+                className="text-[10px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-slate-800 flex items-center gap-0.5"
+              >
+                <span>Close</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </div>
 
-        {!collapsed && (
-          <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            <button
-              onClick={() => logout()}
-              disabled={loading}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition ${
-                pathname === "/" || pathname.startsWith("/find-care") || pathname.startsWith("/doctors")
-                  ? "bg-sky-600 text-white font-medium"
-                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Public Guest</span>
-            </button>
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
+              <button
+                onClick={() => logout()}
+                disabled={loading}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
+                  pathname === "/" || pathname.startsWith("/find-care") || pathname.startsWith("/doctors") || pathname.startsWith("/clinics") || pathname.startsWith("/services") || pathname.startsWith("/telehealth") || pathname.startsWith("/care-finder")
+                    ? "bg-[#526A5B] text-white font-semibold"
+                    : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5 shrink-0 text-slate-300" />
+                <span className="truncate">Public Guest</span>
+              </button>
 
-            <button
-              onClick={() => switchAccount("patient@velahealth.com", "PatientPass123!", "/patient")}
-              disabled={loading}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition ${
-                pathname.startsWith("/patient")
-                  ? "bg-sky-600 text-white font-medium"
-                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Patient (Maria)</span>
-            </button>
+              <button
+                onClick={() => switchAccount("patient@velahealth.com", "PatientPass123!", "/patient")}
+                disabled={loading}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
+                  pathname.startsWith("/patient")
+                    ? "bg-[#526A5B] text-white font-semibold"
+                    : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                }`}
+              >
+                <UserCheck className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                <span className="truncate">Patient (Maria)</span>
+              </button>
 
-            <button
-              onClick={() => switchAccount("doctor.reyes@velahealth.com", "DoctorPass123!", "/doctor")}
-              disabled={loading}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition ${
-                pathname.startsWith("/doctor")
-                  ? "bg-sky-600 text-white font-medium"
-                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-              }`}
-            >
-              <Stethoscope className="w-3.5 h-3.5 text-sky-400" />
-              <span>Doctor (Dr. Reyes)</span>
-            </button>
+              <button
+                onClick={() => switchAccount("doctor.reyes@velahealth.com", "DoctorPass123!", "/doctor")}
+                disabled={loading}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
+                  pathname.startsWith("/doctor")
+                    ? "bg-[#526A5B] text-white font-semibold"
+                    : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                }`}
+              >
+                <Stethoscope className="w-3.5 h-3.5 shrink-0 text-emerald-300" />
+                <span className="truncate">Doctor (Reyes)</span>
+              </button>
 
-            <button
-              onClick={() => switchAccount("admin@velahealth.com", "AdminPass123!", "/admin")}
-              disabled={loading}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition ${
-                pathname.startsWith("/admin")
-                  ? "bg-sky-600 text-white font-medium"
-                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-              }`}
-            >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>Admin (Ops Board)</span>
-            </button>
+              <button
+                onClick={() => switchAccount("admin@velahealth.com", "AdminPass123!", "/admin")}
+                disabled={loading}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
+                  pathname.startsWith("/admin")
+                    ? "bg-[#526A5B] text-white font-semibold"
+                    : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                <span className="truncate">Admin (NOC)</span>
+              </button>
+            </div>
           </div>
         )}
       </div>

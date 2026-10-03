@@ -52,36 +52,36 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#EDF3F8]">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F5F7F5] text-vela-ink">
       <div className="mb-6">
         <Link href="/">
           <VelaLogo size="lg" />
         </Link>
       </div>
 
-      <div className="bg-white rounded-bubble p-6 sm:p-10 border border-slate-200/90 shadow-bubble max-w-md w-full">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E2E8E4] shadow-sm max-w-md w-full">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-vela-ink tracking-tight">
             Sign in to Vela Health
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-vela-muted mt-1">
             Access your patient stream, clinical schedules, or operations board.
           </p>
         </div>
 
         {/* Quick-fill demo account tabs */}
-        <div className="mb-6 bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2 px-1">
+        <div className="mb-6 bg-[#F7F9F7] p-2.5 rounded-2xl border border-[#E2E8E4]">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-vela-muted block mb-2 px-1">
             1-Click Demo Accounts
           </span>
           <div className="grid grid-cols-3 gap-1.5 text-xs">
             <button
               type="button"
               onClick={() => quickFill("PATIENT")}
-              className={`py-1.5 px-2 rounded-xl font-semibold transition ${
+              className={`py-2 px-2 rounded-xl font-semibold transition ${
                 email.includes("patient")
-                  ? "bg-sky-600 text-white shadow-sm"
-                  : "bg-white text-slate-700 hover:bg-slate-100"
+                  ? "bg-vela-sage text-white shadow-sm"
+                  : "bg-white text-vela-ink hover:bg-[#EFF2EF] border border-[#E2E8E4]"
               }`}
             >
               Patient
@@ -89,10 +89,10 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => quickFill("DOCTOR")}
-              className={`py-1.5 px-2 rounded-xl font-semibold transition ${
+              className={`py-2 px-2 rounded-xl font-semibold transition ${
                 email.includes("doctor")
-                  ? "bg-sky-600 text-white shadow-sm"
-                  : "bg-white text-slate-700 hover:bg-slate-100"
+                  ? "bg-vela-sage text-white shadow-sm"
+                  : "bg-white text-vela-ink hover:bg-[#EFF2EF] border border-[#E2E8E4]"
               }`}
             >
               Doctor
@@ -100,10 +100,10 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => quickFill("ADMIN")}
-              className={`py-1.5 px-2 rounded-xl font-semibold transition ${
+              className={`py-2 px-2 rounded-xl font-semibold transition ${
                 email.includes("admin")
-                  ? "bg-sky-600 text-white shadow-sm"
-                  : "bg-white text-slate-700 hover:bg-slate-100"
+                  ? "bg-vela-sage text-white shadow-sm"
+                  : "bg-white text-vela-ink hover:bg-[#EFF2EF] border border-[#E2E8E4]"
               }`}
             >
               Admin
@@ -120,33 +120,33 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+            <label className="text-[11px] font-bold uppercase text-vela-muted block mb-1">
               Email Address
             </label>
             <div className="relative flex items-center">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+              <Mail className="w-4 h-4 text-vela-muted absolute left-3.5 pointer-events-none" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+            <label className="text-[11px] font-bold uppercase text-vela-muted block mb-1">
               Password
             </label>
             <div className="relative flex items-center">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+              <Lock className="w-4 h-4 text-vela-muted absolute left-3.5 pointer-events-none" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
           </div>
@@ -154,16 +154,16 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-2"
           >
             {loading ? "Authenticating..." : "Sign In to Account"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+        <div className="mt-6 pt-4 border-t border-[#E2E8E4] text-center text-xs text-vela-muted">
           <span>New patient? </span>
-          <Link href="/register" className="font-bold text-sky-600 hover:text-sky-700">
+          <Link href="/register" className="font-bold text-vela-sage hover:text-vela-sageDark">
             Create an Account
           </Link>
         </div>

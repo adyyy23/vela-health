@@ -570,6 +570,32 @@ export function performDigitalCheckIn(appointmentId: string, patientId: string):
   return true;
 }
 
+// Update appointment status (e.g. IN_CONSULTATION, COMPLETED, CANCELLED)
+export function updateAppointmentStatus(
+  appointmentId: string,
+  newStatus: string,
+  changedBy: string,
+  note?: string
+): boolean {
+  const db = getDb();
+  const apt = db.prepare("SELECT * FROM appointments WHERE id = ?").get(appointmentId) as any;
+  if (!apt) return false;
+
+  const now = new Date().toISOString();
+  db.prepare(`
+    UPDATE appointments 
+    SET status = ?, updated_at = ?
+    WHERE id = ?
+  `).run(newStatus, now, appointmentId);
+
+  db.prepare(`
+    INSERT INTO appointment_status_history (id, appointment_id, status, note, changed_by, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(`ash-${Date.now()}`, appointmentId, newStatus, note || `Status updated to ${newStatus}`, changedBy, now);
+
+  return true;
+}
+
 // Doctor Clinical Workspace: save consultation notes & complete
 export function saveClinicalConsultation(
   appointmentId: string,

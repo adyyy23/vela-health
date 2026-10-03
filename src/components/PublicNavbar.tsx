@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import VelaLogo from "./VelaLogo";
-import { Search, Calendar, Menu, X, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, Menu, X, ArrowRight } from "lucide-react";
 
 export default function PublicNavbar() {
   const pathname = usePathname();
@@ -14,102 +14,106 @@ export default function PublicNavbar() {
     { href: "/find-care", label: "Find Care" },
     { href: "/doctors", label: "Doctors" },
     { href: "/clinics", label: "Clinics" },
-    { href: "/care-finder", label: "Care Finder", highlight: true },
+    { href: "/services", label: "Services" },
+    { href: "/care-finder", label: "Care Finder" },
     { href: "/telehealth", label: "Telehealth" },
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full px-4 sm:px-8 py-3 transition-all duration-200">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white/85 backdrop-blur-md border border-slate-200/80 rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-4 sm:px-6 py-2.5 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/">
-            <VelaLogo size="md" />
-          </Link>
+    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-vela-border">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-15 flex items-center justify-between">
+        {/* Brand Logo */}
+        <Link href="/" className="hover:opacity-95 transition">
+          <VelaLogo size="md" />
+        </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition flex items-center gap-1.5 ${
-                    isActive
-                      ? "bg-slate-100 text-sky-700 font-semibold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                  }`}
-                >
-                  {link.highlight && <Sparkles className="w-3.5 h-3.5 text-sky-500" />}
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Actions */}
-          <div className="hidden sm:flex items-center gap-2.5">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-slate-700 hover:text-slate-900 px-4 py-2 rounded-full hover:bg-slate-100/70 transition"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/book"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 px-5 py-2 rounded-full shadow-sm hover:shadow transition"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Book Appointment</span>
-            </Link>
-          </div>
-
-          {/* Mobile hamburger */}
-          <div className="flex md:hidden items-center gap-2">
-            <Link
-              href="/book"
-              className="text-xs font-semibold text-white bg-sky-600 px-3.5 py-1.5 rounded-full"
-            >
-              Book
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-600 hover:bg-slate-100"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile dropdown drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-2 bg-white rounded-3xl border border-slate-200/80 shadow-xl p-4 flex flex-col gap-2">
-            {navLinks.map((link) => (
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-5 lg:gap-7">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 font-medium"
+                className={`text-xs font-medium transition ${
+                  isActive
+                    ? "text-vela-forest font-bold border-b-2 border-vela-sage pb-0.5"
+                    : "text-vela-inkMuted hover:text-vela-ink"
+                }`}
               >
-                <div className="flex items-center gap-2">
-                  {link.highlight && <Sparkles className="w-4 h-4 text-sky-500" />}
-                  <span>{link.label}</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-400" />
+                {link.label}
               </Link>
-            ))}
-            <hr className="my-1 border-slate-100" />
+            );
+          })}
+        </nav>
+
+        {/* Right CTA Actions */}
+        <div className="hidden sm:flex items-center gap-3.5">
+          <Link
+            href="/login"
+            className="text-xs font-semibold text-vela-ink hover:text-vela-sage transition px-2 py-1.5"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/book"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-vela-sage hover:bg-vela-sageDark px-3.5 py-2 rounded-button shadow-sm transition"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Book Appointment</span>
+          </Link>
+        </div>
+
+        {/* Mobile Hamburger */}
+        <div className="flex md:hidden items-center gap-2">
+          <Link
+            href="/book"
+            className="text-xs font-bold text-white bg-vela-sage hover:bg-vela-sageDark px-3 py-1.5 rounded-button"
+          >
+            Book
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-1.5 text-vela-ink hover:bg-vela-surfaceSubtle rounded-lg transition"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-vela-border px-4 py-3 flex flex-col gap-1.5 shadow-md">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between py-2 text-xs font-medium text-vela-ink hover:text-vela-sage transition"
+            >
+              <span>{link.label}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-vela-muted" />
+            </Link>
+          ))}
+          <div className="pt-2.5 mt-1 border-t border-vela-border flex items-center justify-between">
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-2.5 text-center text-sm font-semibold text-slate-700 bg-slate-100 rounded-2xl"
+              className="text-xs font-semibold text-vela-ink"
             >
               Sign In
             </Link>
+            <Link
+              href="/register"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-xs font-bold text-vela-sage"
+            >
+              Create Account
+            </Link>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </header>
   );
 }

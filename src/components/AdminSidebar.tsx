@@ -58,7 +58,7 @@ export default function AdminSidebar() {
         {/* Brand */}
         <div className="pb-6 border-b border-slate-800">
           <VelaLogo size="md" inverted />
-          <div className="mt-2 flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 text-sky-400 text-[11px] font-semibold rounded-lg w-max border border-slate-700/60">
+          <div className="mt-2 flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 text-emerald-400 text-[11px] font-semibold rounded-lg w-max border border-slate-700/60">
             <span>Operations Console</span>
           </div>
         </div>
@@ -81,14 +81,14 @@ export default function AdminSidebar() {
                       href={item.href}
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition ${
                         isActive
-                          ? "bg-sky-600 text-white shadow-sm"
+                          ? "bg-vela-sage text-white shadow-sm"
                           : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                       }`}
                     >
                       <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`} />
                       <span>{item.label}</span>
                       {item.highlight && (
-                        <span className="ml-auto text-[9px] bg-sky-500/20 text-sky-300 border border-sky-400/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                        <span className="ml-auto text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                           Live
                         </span>
                       )}

@@ -41,17 +41,17 @@ export default function DoctorAppointmentsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
+    <div className="flex flex-col gap-6 text-vela-ink">
+      <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-sky-600 block mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-vela-sage block mb-1">
               Physician Calendar & Ledger
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-vela-ink tracking-tight">
               Clinical Appointments
             </h1>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-vela-muted mt-1">
               Manage patient consultations, launch clinical workspaces, and review past encounter notes.
             </p>
           </div>
@@ -60,7 +60,7 @@ export default function DoctorAppointmentsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+              className="px-3.5 py-2 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4] text-xs font-semibold text-vela-ink"
             >
               <option value="">All Statuses</option>
               <option value="CHECKED_IN">Checked In</option>
@@ -75,33 +75,33 @@ export default function DoctorAppointmentsPage() {
         {filtered.map((apt) => (
           <div
             key={apt.id}
-            className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            className="bg-white rounded-card p-5 border border-[#E2E8E4] shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-vela-sage/30 transition"
           >
             <div className="flex items-start gap-4">
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
                 alt="Patient"
-                className="w-12 h-12 rounded-2xl object-cover border border-slate-200 shrink-0"
+                className="w-12 h-12 rounded-xl object-cover border border-[#E2E8E4] shrink-0"
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-sm text-slate-900">{apt.patientName}</h3>
+                  <h3 className="font-bold text-sm text-vela-ink">{apt.patientName}</h3>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-pill border ${
                       apt.status === "CHECKED_IN"
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : apt.status === "COMPLETED"
-                        ? "bg-slate-100 text-slate-700 border-slate-200"
-                        : "bg-sky-50 text-sky-700 border-sky-200"
+                        ? "bg-vela-surfaceSubtle text-vela-muted border-[#E2E8E4]"
+                        : "bg-[#EAF0EC] text-vela-forest border-vela-sage/30"
                     }`}
                   >
                     {apt.status.replace("_", " ")}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">{apt.reason}</p>
-                <div className="mt-2 flex items-center gap-3 text-xs text-slate-600">
-                  <span className="font-bold text-slate-800 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <p className="text-xs text-vela-muted mt-0.5">{apt.reason}</p>
+                <div className="mt-2 flex items-center gap-3 text-xs text-vela-muted">
+                  <span className="font-bold text-vela-ink flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-vela-muted" />
                     <span>{apt.scheduledDate} at {apt.scheduledTime}</span>
                   </span>
                   <span>•</span>
@@ -114,7 +114,7 @@ export default function DoctorAppointmentsPage() {
 
             <Link
               href={`/doctor/workspace/${apt.id}`}
-              className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 self-end sm:self-center"
+              className="px-4 py-2.5 rounded-button bg-vela-sage hover:bg-vela-sageDark text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 self-end sm:self-center"
             >
               <FileEdit className="w-4 h-4" />
               <span>Clinical Workspace</span>

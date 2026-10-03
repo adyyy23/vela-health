@@ -1,6 +1,5 @@
-const CACHE_NAME = "vela-health-v1";
+const CACHE_NAME = "vela-health-v2";
 const ASSETS_TO_CACHE = [
-  "/",
   "/manifest.json",
   "/icons/icon-192.svg",
   "/icons/icon-512.svg",
@@ -33,35 +32,23 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // For API and dynamic mutations, strictly use network first
-  if (url.pathname.startsWith("/api/")) {
+  // Never intercept or cache API, Next.js internal chunks, scripts, or stylesheets
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/_next/") ||
+    event.request.destination === "style" ||
+    event.request.destination === "script"
+  ) {
+    return; // Let the browser handle standard network fetching directly
+  }
+
+  // Network-first for HTML pages
+  if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return new Response(
-          JSON.stringify({ error: "Network offline. Please reconnect to perform this action." }),
-          { status: 503, headers: { "Content-Type": "application/json" } }
-        );
+        return caches.match("/") || new Response("Offline", { status: 503 });
       })
     );
     return;
   }
-
-  // Stale-while-revalidate for static shell assets
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse.clone());
-            });
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        return caches.match("/");
-      });
-    })
-  );
 });

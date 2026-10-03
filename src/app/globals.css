@@ -5,57 +5,43 @@
 @tailwind utilities;
 
 :root {
-  --background: #EDF3F8;
-  --foreground: #0F172A;
+  --background: #F5F6F1;
+  --foreground: #17231D;
 }
 
 body {
-  color: #0F172A;
-  background-color: #EDF3F8;
+  color: #17231D;
+  background-color: #F5F6F1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Custom scrollbars for clean minimal panels */
+/* Subtle, unobtrusive scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D8DDD7;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #BAC3B9;
 }
 
 /* Leaflet map custom tweaks */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #E2E8F0;
+  background: #E8ECE8;
   font-family: inherit;
 }
 
 .custom-map-pin {
   background: transparent;
   border: none;
-}
-
-/* Restrained animations */
-@keyframes slideUpSheet {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.animate-sheet-up {
-  animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0284C7",
+  themeColor: "#1B3629",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -33,7 +33,7 @@ export default function RootLayout({
         <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
-      <body className="min-h-full font-sans text-slate-900 bg-[#EDF3F8] antialiased flex flex-col selection:bg-sky-100 selection:text-sky-900">
+      <body className="min-h-full font-sans text-vela-ink bg-[#F5F7F5] antialiased flex flex-col selection:bg-[#EFF2EF] selection:text-vela-forest">
         <div className="flex-1 flex flex-col w-full">{children}</div>
         <RoleDemoToolbar />
         <script
@@ -41,7 +41,9 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    reg.update();
+                  }).catch(function() {});
                 });
               }
             `,

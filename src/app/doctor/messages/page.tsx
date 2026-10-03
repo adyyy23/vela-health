@@ -64,24 +64,24 @@ export default function DoctorMessagesPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
-        <span className="text-xs font-bold uppercase tracking-wider text-sky-600 block mb-1">
+    <div className="flex flex-col gap-6 text-vela-ink">
+      <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
+        <span className="text-xs font-bold uppercase tracking-wider text-vela-sage block mb-1">
           Clinical Communications
         </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-vela-ink tracking-tight">
           Patient Inquiries & Messages
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-vela-muted mt-1">
           Appointment-linked discussions and post-consultation follow-up with Dr. Reyes.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[600px] items-stretch">
         {/* Thread List (Col 4) */}
-        <div className="lg:col-span-4 bg-white rounded-bubble border border-slate-200/90 shadow-bubble overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <span className="text-xs font-bold text-slate-700">Conversations</span>
+        <div className="lg:col-span-4 bg-white rounded-card border border-[#E2E8E4] shadow-sm overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-[#E2E8E4] bg-vela-surfaceSubtle">
+            <span className="text-xs font-bold text-vela-ink">Conversations</span>
           </div>
 
           <div className="overflow-y-auto flex-1 p-2 space-y-1">
@@ -91,21 +91,21 @@ export default function DoctorMessagesPage() {
                 <button
                   key={c.id}
                   onClick={() => setActiveConvId(c.id)}
-                  className={`w-full p-3 rounded-2xl text-left transition flex items-start gap-3 ${
-                    isActive ? "bg-sky-50 border border-sky-200" : "hover:bg-slate-50"
+                  className={`w-full p-3 rounded-button text-left transition flex items-start gap-3 ${
+                    isActive ? "bg-[#EAF0EC] border border-vela-sage/30" : "hover:bg-vela-surfaceSubtle"
                   }`}
                 >
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
                     alt={c.patientName}
-                    className="w-10 h-10 rounded-xl object-cover"
+                    className="w-10 h-10 rounded-xl object-cover border border-[#E2E8E4]"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
-                      <h4 className="font-bold text-xs text-slate-900 truncate">{c.patientName}</h4>
-                      <span className="text-[10px] text-slate-400">10:24 AM</span>
+                      <h4 className="font-bold text-xs text-vela-ink truncate">{c.patientName}</h4>
+                      <span className="text-[10px] text-vela-muted">10:24 AM</span>
                     </div>
-                    <p className="text-xs text-slate-500 truncate">{c.lastMessage}</p>
+                    <p className="text-xs text-vela-muted truncate">{c.lastMessage}</p>
                   </div>
                 </button>
               );
@@ -114,32 +114,32 @@ export default function DoctorMessagesPage() {
         </div>
 
         {/* Active Conversation Chat (Col 8) */}
-        <div className="lg:col-span-8 bg-white rounded-bubble border border-slate-200/90 shadow-bubble flex flex-col overflow-hidden">
+        <div className="lg:col-span-8 bg-white rounded-card border border-[#E2E8E4] shadow-sm flex flex-col overflow-hidden">
           {activeConv ? (
             <>
               {/* Header */}
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="p-4 border-b border-[#E2E8E4] flex items-center justify-between bg-vela-surfaceSubtle">
                 <div className="flex items-center gap-3">
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
                     alt={activeConv.patientName}
-                    className="w-9 h-9 rounded-xl object-cover"
+                    className="w-9 h-9 rounded-xl object-cover border border-[#E2E8E4]"
                   />
                   <div>
-                    <h3 className="font-bold text-xs text-slate-900">{activeConv.patientName}</h3>
-                    <span className="text-[10px] text-sky-600 font-semibold block">
+                    <h3 className="font-bold text-xs text-vela-ink">{activeConv.patientName}</h3>
+                    <span className="text-[10px] text-vela-sage font-semibold block">
                       Active Encounter • Checked In
                     </span>
                   </div>
                 </div>
 
-                <span className="text-[10px] font-bold text-slate-400 bg-white px-2.5 py-1 rounded-full border border-slate-200">
+                <span className="text-[10px] font-bold text-vela-muted bg-white px-2.5 py-1 rounded-pill border border-[#E2E8E4]">
                   Ref: VELA-89421
                 </span>
               </div>
 
               {/* Messages Body */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#F8FAFC]">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-vela-canvas">
                 {messages.map((m) => {
                   const isDoctor = m.senderRole === "DOCTOR";
                   return (
@@ -148,15 +148,15 @@ export default function DoctorMessagesPage() {
                       className={`flex flex-col ${isDoctor ? "items-end" : "items-start"}`}
                     >
                       <div
-                        className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
+                        className={`max-w-[75%] px-4 py-2.5 rounded-card text-xs leading-relaxed ${
                           isDoctor
-                            ? "bg-slate-900 text-white rounded-br-sm"
-                            : "bg-white text-slate-900 border border-slate-200/80 rounded-bl-sm shadow-sm"
+                            ? "bg-vela-forest text-white rounded-br-sm"
+                            : "bg-white text-vela-ink border border-[#E2E8E4] rounded-bl-sm shadow-sm"
                         }`}
                       >
                         <p>{m.content}</p>
                       </div>
-                      <span className="text-[9px] text-slate-400 mt-1 px-1">
+                      <span className="text-[9px] text-vela-muted mt-1 px-1">
                         {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
@@ -168,19 +168,19 @@ export default function DoctorMessagesPage() {
               {/* Reply Composer */}
               <form
                 onSubmit={handleSendReply}
-                className="p-3 border-t border-slate-100 bg-white flex items-center gap-2"
+                className="p-3 border-t border-[#E2E8E4] bg-white flex items-center gap-2"
               >
                 <input
                   type="text"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="Send clinical message or prescription instructions..."
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="flex-1 px-4 py-2.5 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
                 />
                 <button
                   type="submit"
                   disabled={sending || !replyText.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-button bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Send</span>
@@ -188,7 +188,7 @@ export default function DoctorMessagesPage() {
               </form>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-xs text-slate-400">
+            <div className="flex items-center justify-center h-full text-xs text-vela-muted">
               Select a conversation to reply.
             </div>
           )}

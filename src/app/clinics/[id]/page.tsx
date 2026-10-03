@@ -15,6 +15,8 @@ import {
   Star,
   ChevronRight,
   ArrowRight,
+  Building2,
+  ShieldCheck,
 } from "lucide-react";
 
 export default async function ClinicProfilePage({
@@ -32,100 +34,101 @@ export default async function ClinicProfilePage({
   const doctors = getDoctors({ clinicId: clinic.id });
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EDF3F8]">
+    <div className="min-h-screen flex flex-col bg-[#F5F7F5] text-vela-ink">
       <PublicNavbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 w-full">
         {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-xs text-slate-500">
-          <Link href="/" className="hover:text-slate-900">Home</Link>
+        <div className="mb-6 flex items-center gap-2 text-xs text-vela-muted">
+          <Link href="/" className="hover:text-vela-forest transition">Home</Link>
           <span>/</span>
-          <Link href="/find-care" className="hover:text-slate-900">Clinics</Link>
+          <Link href="/clinics" className="hover:text-vela-forest transition">Clinics</Link>
           <span>/</span>
-          <span className="text-slate-900 font-semibold">{clinic.name}</span>
+          <span className="text-vela-ink font-semibold">{clinic.name}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Column */}
           <div className="lg:col-span-8 flex flex-col gap-6">
             {/* Banner & Image */}
-            <div className="bg-white rounded-bubble overflow-hidden border border-slate-200/90 shadow-bubble">
-              <div className="relative h-72 sm:h-96">
+            <div className="bg-white rounded-card overflow-hidden border border-[#E2E8E4] shadow-sm">
+              <div className="relative h-72 sm:h-80">
                 <img
                   src={clinic.imageUrl}
                   alt={clinic.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 text-white">
-                  <span className="text-xs font-bold uppercase tracking-wider text-sky-300">
-                    San Francisco Care Center
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-white/20 backdrop-blur-md text-emerald-200 text-xs font-bold mb-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>San Francisco Care Center</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
                     {clinic.name}
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-200 flex items-center gap-1.5 mt-1">
-                    <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
+                  <p className="text-xs sm:text-sm text-slate-200 flex items-center gap-1.5 mt-1.5">
+                    <MapPin className="w-4 h-4 text-emerald-300 shrink-0" />
                     <span>{clinic.address}, {clinic.city}, {clinic.state} {clinic.postalCode}</span>
                   </p>
                 </div>
               </div>
 
               {/* Quick Contact & Hours */}
-              <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-100 text-xs">
+              <div className="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-[#E2E8E4] text-xs">
                 <div className="flex items-start gap-3">
-                  <Clock className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                  <Clock className="w-4 h-4 text-vela-sage shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-slate-900 block">Hours of Operation</span>
-                    <span className="text-slate-600">{clinic.operatingHours}</span>
+                    <span className="font-bold text-vela-ink block">Hours of Operation</span>
+                    <span className="text-vela-muted">{clinic.operatingHours}</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                  <Phone className="w-4 h-4 text-vela-sage shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-slate-900 block">Facility Telephone</span>
-                    <span className="text-slate-600">{clinic.phone}</span>
+                    <span className="font-bold text-vela-ink block">Facility Telephone</span>
+                    <span className="text-vela-muted">{clinic.phone}</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                  <Mail className="w-4 h-4 text-vela-sage shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-slate-900 block">Direct Inquiries</span>
-                    <span className="text-slate-600">{clinic.email}</span>
+                    <span className="font-bold text-vela-ink block">Direct Inquiries</span>
+                    <span className="text-vela-muted">{clinic.email}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Accessibility & Parking Details */}
-            <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-4">
+            <div className="bg-white rounded-card p-5 sm:p-6 border border-[#E2E8E4] shadow-sm">
+              <h2 className="text-base font-bold text-vela-ink tracking-tight mb-4">
                 Access, Parking & Facility Amenities
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-start gap-3">
-                  <Car className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                <div className="p-4 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4] flex items-start gap-3">
+                  <Car className="w-5 h-5 text-vela-sage shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900 mb-1">Parking & Transit</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{clinic.parkingInfo}</p>
+                    <h4 className="font-bold text-xs text-vela-ink mb-1">Parking & Transit</h4>
+                    <p className="text-xs text-vela-muted leading-relaxed">{clinic.parkingInfo}</p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-start gap-3">
-                  <Accessibility className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                <div className="p-4 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4] flex items-start gap-3">
+                  <Accessibility className="w-5 h-5 text-vela-sage shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900 mb-1">Accessibility Standards</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{clinic.accessibilityInfo}</p>
+                    <h4 className="font-bold text-xs text-vela-ink mb-1">Accessibility Standards</h4>
+                    <p className="text-xs text-vela-muted leading-relaxed">{clinic.accessibilityInfo}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Clinicians at this Facility */}
-            <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-4">
+            <div className="bg-white rounded-card p-5 sm:p-6 border border-[#E2E8E4] shadow-sm">
+              <h2 className="text-base font-bold text-vela-ink tracking-tight mb-4">
                 Practicing Physicians at this Facility
               </h2>
 
@@ -133,20 +136,20 @@ export default async function ClinicProfilePage({
                 {doctors.map((doc) => (
                   <div
                     key={doc.userId}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3"
+                    className="p-4 rounded-button bg-vela-surfaceSubtle border border-[#E2E8E4] flex items-center justify-between gap-3 hover:border-vela-sage/40 transition"
                   >
                     <div className="flex items-center gap-3">
                       <img
                         src={doc.user?.avatarUrl}
                         alt={doc.user?.firstName}
-                        className="w-12 h-12 rounded-xl object-cover border border-slate-200"
+                        className="w-11 h-11 rounded-xl object-cover border border-[#E2E8E4]"
                       />
                       <div>
-                        <h4 className="text-xs font-bold text-slate-900">
+                        <h4 className="text-xs font-bold text-vela-ink">
                           Dr. {doc.user?.firstName} {doc.user?.lastName}
                         </h4>
-                        <span className="text-[11px] text-sky-600 block">{doc.specialtyName}</span>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                        <span className="text-[11px] text-vela-sage font-medium block">{doc.specialtyName}</span>
+                        <div className="flex items-center gap-1 text-[10px] text-vela-muted mt-0.5">
                           <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                           <span>{doc.rating}</span>
                         </div>
@@ -155,7 +158,7 @@ export default async function ClinicProfilePage({
 
                     <Link
                       href={`/book?doctorId=${doc.userId}&clinicId=${clinic.id}`}
-                      className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-sm transition"
+                      className="px-3.5 py-1.5 rounded-button bg-vela-sage hover:bg-vela-sageDark text-white text-xs font-semibold shadow-sm transition"
                     >
                       Book
                     </Link>
@@ -167,22 +170,22 @@ export default async function ClinicProfilePage({
 
           {/* Right Column / Sticky CTA */}
           <div className="lg:col-span-4 sticky top-24 flex flex-col gap-4">
-            <div className="bg-white rounded-bubble p-6 border border-slate-200/90 shadow-bubble">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 block mb-1">
+            <div className="bg-white rounded-card p-6 border border-[#E2E8E4] shadow-sm">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-vela-forest bg-[#EFF2EF] px-2.5 py-1 rounded-pill inline-block mb-3 border border-[#E2E8E4]">
                 Walk-ins & Scheduled Visits
               </span>
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              <h3 className="text-lg font-bold text-vela-ink tracking-tight">
                 Visit {clinic.name}
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Digital check-in active. Arrival within 20 minutes automatically signals our reception team.
+              <p className="text-xs text-vela-muted mt-1.5 leading-relaxed">
+                Digital check-in active. Arrival within 20 minutes automatically alerts our triage desk for immediate priority routing.
               </p>
 
-              <hr className="my-4 border-slate-100" />
+              <hr className="my-4 border-[#E2E8E4]" />
 
               <Link
                 href={`/book?clinicId=${clinic.id}`}
-                className="w-full py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 mb-2"
+                className="w-full py-3 rounded-button bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 mb-2.5"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Book Appointment at Facility</span>
@@ -190,7 +193,7 @@ export default async function ClinicProfilePage({
 
               <Link
                 href="/find-care"
-                className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition text-center block"
+                className="w-full py-2.5 rounded-button bg-vela-surfaceSubtle hover:bg-[#E2E8E4] text-vela-ink font-semibold text-xs transition text-center block"
               >
                 View on Care Map
               </Link>

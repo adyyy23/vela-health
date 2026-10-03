@@ -55,32 +55,32 @@ export default function DoctorsPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EDF3F8]">
+    <div className="min-h-screen flex flex-col bg-vela-canvas text-vela-ink">
       <PublicNavbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
         {/* Header Surface */}
-        <div className="bg-white rounded-bubble p-6 sm:p-8 border border-slate-200/90 shadow-bubble mb-8">
-          <span className="text-xs font-bold uppercase tracking-wider text-sky-600">
+        <div className="bg-white rounded-card p-6 sm:p-8 border border-[#E2E8E4] shadow-sm mb-8">
+          <span className="text-xs font-bold uppercase tracking-wider text-vela-sage">
             Medical Staff Directory
           </span>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+          <h1 className="text-3xl font-extrabold text-vela-ink tracking-tight mt-1">
             Verified Doctors & Specialists
           </h1>
-          <p className="text-sm text-slate-600 mt-1 max-w-xl">
+          <p className="text-sm text-vela-muted mt-1 max-w-xl">
             Schedule direct in-person visits across our San Francisco clinics or connect instantly over HD telehealth.
           </p>
 
           {/* Filter Bar */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div className="sm:col-span-6 relative flex items-center">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+              <Search className="w-4 h-4 text-vela-muted absolute left-3.5 pointer-events-none" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by physician name or specialty..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-card bg-vela-surfaceSubtle border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
 
@@ -88,7 +88,7 @@ export default function DoctorsPage() {
               <select
                 value={selectedSpecialty}
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3.5 py-2.5 rounded-card bg-vela-surfaceSubtle border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               >
                 <option value="">All Specialties</option>
                 <option value="spec-derma">Dermatology</option>
@@ -102,7 +102,7 @@ export default function DoctorsPage() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3.5 py-2.5 rounded-card bg-vela-surfaceSubtle border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               >
                 <option value="">Any Consultation</option>
                 <option value="IN_PERSON">In-Person Only</option>
@@ -117,59 +117,59 @@ export default function DoctorsPage() {
           {filteredDoctors.map((doc) => (
             <div
               key={doc.userId}
-              className="bg-white rounded-bubble p-6 border border-slate-200/90 shadow-bubble flex flex-col justify-between group hover:border-slate-300 transition"
+              className="bg-white rounded-card p-6 border border-[#E2E8E4] shadow-sm flex flex-col justify-between group hover:border-vela-sage/40 transition"
             >
               <div>
                 <div className="flex items-start gap-4">
                   <img
                     src={doc.user?.avatarUrl}
                     alt={doc.user?.firstName}
-                    className="w-20 h-20 rounded-2xl object-cover border border-slate-200 shrink-0"
+                    className="w-20 h-20 rounded-xl object-cover border border-[#E2E8E4] shrink-0"
                   />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
-                        <h2 className="text-base font-bold text-slate-900">
+                        <h2 className="text-base font-bold text-vela-ink">
                           Dr. {doc.user?.firstName} {doc.user?.lastName}, MD
                         </h2>
-                        <CheckCircle2 className="w-4 h-4 text-sky-600" />
+                        <CheckCircle2 className="w-4 h-4 text-vela-sage" />
                       </div>
-                      <div className="flex items-center gap-1 text-xs font-bold text-slate-900 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
+                      <div className="flex items-center gap-1 text-xs font-bold text-vela-ink bg-amber-50 px-2 py-0.5 rounded-pill border border-amber-200/60">
                         <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                         <span>{doc.rating}</span>
-                        <span className="text-slate-400 font-normal">({doc.reviewCount})</span>
+                        <span className="text-vela-muted font-normal">({doc.reviewCount})</span>
                       </div>
                     </div>
 
-                    <span className="text-xs font-semibold text-sky-600 block mt-0.5">
+                    <span className="text-xs font-semibold text-vela-sage block mt-0.5">
                       {doc.specialtyName}
                     </span>
 
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                    <p className="text-xs text-vela-muted flex items-center gap-1 mt-1">
+                      <Building2 className="w-3.5 h-3.5 text-vela-muted" />
                       <span>{doc.clinicName || "Vela Central Pavilion"}</span>
                     </p>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-600 mt-4 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-vela-muted mt-4 line-clamp-2 leading-relaxed">
                   {doc.bio}
                 </p>
 
                 {/* Badges / Languages */}
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
-                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-pill bg-vela-surfaceSubtle text-vela-muted">
                     <Languages className="w-3 h-3" />
                     <span>{doc.languages.join(", ")}</span>
                   </div>
 
-                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
+                  <span className="px-2.5 py-1 rounded-pill bg-vela-surfaceSubtle text-vela-muted font-medium">
                     {doc.experienceYears} Years Clinical Exp
                   </span>
 
                   {doc.telehealthAvailable && (
-                    <span className="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 font-semibold border border-sky-100 flex items-center gap-1">
-                      <Video className="w-3 h-3" />
+                    <span className="px-2.5 py-1 rounded-pill bg-[#EAF0EC] text-vela-forest font-semibold border border-vela-sage/20 flex items-center gap-1">
+                      <Video className="w-3 h-3 text-vela-sage" />
                       <span>Telehealth Available</span>
                     </span>
                   )}
@@ -177,23 +177,23 @@ export default function DoctorsPage() {
               </div>
 
               {/* Footer CTA */}
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div className="mt-6 pt-4 border-t border-[#E2E8E4] flex items-center justify-between gap-3">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">Consultation Fee</span>
-                  <span className="text-sm font-bold text-slate-900">${doc.consultationFee}</span>
+                  <span className="text-[10px] text-vela-muted uppercase font-semibold block">Consultation Fee</span>
+                  <span className="text-sm font-bold text-vela-ink">${doc.consultationFee}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/doctors/${doc.userId}`}
-                    className="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition"
+                    className="px-4 py-2 rounded-button bg-vela-surfaceSubtle hover:bg-[#EAF0EC] text-vela-ink text-xs font-semibold transition"
                   >
                     View Profile
                   </Link>
 
                   <Link
                     href={`/book?doctorId=${doc.userId}`}
-                    className="px-5 py-2 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+                    className="px-5 py-2 rounded-button bg-vela-sage hover:bg-vela-sageDark text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
                   >
                     <Calendar className="w-3.5 h-3.5" />
                     <span>Book Schedule</span>

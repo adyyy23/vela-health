@@ -73,13 +73,13 @@ export default function CareMap({
         <div class="relative group cursor-pointer transition-transform duration-200 ${isSelected ? "scale-110 z-50" : "scale-100"}">
           <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full ${
             isSelected
-              ? "bg-slate-900 text-white shadow-xl ring-4 ring-sky-300/60"
-              : "bg-white text-slate-800 shadow-md border border-slate-200/90 hover:bg-slate-50"
+              ? "bg-[#1B3629] text-white shadow-xl ring-4 ring-[#3B6B55]/40"
+              : "bg-white text-[#14221C] shadow-md border border-[#E2E8E4] hover:bg-[#F5F7F5]"
           }">
-            <div class="w-2.5 h-2.5 rounded-full ${isSelected ? "bg-sky-400 animate-pulse" : "bg-sky-500"}"></div>
+            <div class="w-2.5 h-2.5 rounded-full ${isSelected ? "bg-emerald-400 animate-pulse" : "bg-[#3B6B55]"}"></div>
             <span class="text-xs font-semibold whitespace-nowrap">${clinic.name.replace("Vela ", "")}</span>
           </div>
-          <div class="w-2 h-2 bg-slate-900 rotate-45 mx-auto -mt-1 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}"></div>
+          <div class="w-2 h-2 ${isSelected ? "bg-[#1B3629]" : "bg-white"} rotate-45 mx-auto -mt-1 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}"></div>
         </div>
       `;
 
