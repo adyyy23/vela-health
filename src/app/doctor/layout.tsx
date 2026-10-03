@@ -1,15 +1,19 @@
-import React from "react";
-import DoctorHeaderNav from "@/components/DoctorHeaderNav";
-
-export default function DoctorLayout({
+export const dynamic = "force-dynamic";
+import { redirect } from "next/navigation";
+import { getSessionUser } from "@/lib/auth";
+import WorkspaceNav from "@/components/WorkspaceNav";
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getSessionUser();
+  if (!user) redirect("/login");
+  if (user.role !== "DOCTOR") redirect(`/${user.role.toLowerCase()}`);
   return (
-    <div className="min-h-screen bg-vela-canvas text-vela-ink flex flex-col font-sans">
-      <DoctorHeaderNav />
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen">
+      <WorkspaceNav role="DOCTOR" name={`${user.firstName} ${user.lastName}`} />
+      <main id="main-content" className="workspace-shell">
         {children}
       </main>
     </div>

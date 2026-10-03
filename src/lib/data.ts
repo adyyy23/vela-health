@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+import { clinicDate, clinicTime, validDate, validTime } from "./care-time";
 import { getDb } from "./db";
 import {
   Clinic,
@@ -21,12 +23,16 @@ import {
 // ==========================================
 export function getAllClinics(): Clinic[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT c.*, 
       (SELECT COUNT(DISTINCT user_id) FROM doctor_profiles WHERE clinic_id = c.id) as doctor_count
     FROM clinics c
     ORDER BY c.name ASC
-  `).all() as any[];
+  `,
+    )
+    .all() as any[];
 
   return rows.map((r) => ({
     id: r.id,
@@ -45,18 +51,22 @@ export function getAllClinics(): Clinic[] {
     accessibilityInfo: r.accessibility_info,
     imageUrl: r.image_url,
     doctorCount: r.doctor_count,
-    nextAvailableSlot: "Today 2:30 PM",
+    nextAvailableSlot: "Check available times",
   }));
 }
 
 export function getClinicById(id: string): Clinic | null {
   const db = getDb();
-  const r = db.prepare(`
+  const r = db
+    .prepare(
+      `
     SELECT c.*, 
       (SELECT COUNT(DISTINCT user_id) FROM doctor_profiles WHERE clinic_id = c.id) as doctor_count
     FROM clinics c
     WHERE c.id = ? OR c.slug = ?
-  `).get(id, id) as any;
+  `,
+    )
+    .get(id, id) as any;
 
   if (!r) return null;
 
@@ -77,7 +87,7 @@ export function getClinicById(id: string): Clinic | null {
     accessibilityInfo: r.accessibility_info,
     imageUrl: r.image_url,
     doctorCount: r.doctor_count,
-    nextAvailableSlot: "Available Today",
+    nextAvailableSlot: "Check available times",
   };
 }
 
@@ -86,7 +96,9 @@ export function getClinicById(id: string): Clinic | null {
 // ==========================================
 export function getAllSpecialties(): Specialty[] {
   const db = getDb();
-  const rows = db.prepare("SELECT * FROM specialties ORDER BY name ASC").all() as any[];
+  const rows = db
+    .prepare("SELECT * FROM specialties ORDER BY name ASC")
+    .all() as any[];
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -178,9 +190,13 @@ export function getDoctors(filters?: {
   }));
 }
 
-export function getDoctorById(userId: string): (DoctorProfile & { services: Service[]; reviews: Review[] }) | null {
+export function getDoctorById(
+  userId: string,
+): (DoctorProfile & { services: Service[]; reviews: Review[] }) | null {
   const db = getDb();
-  const r = db.prepare(`
+  const r = db
+    .prepare(
+      `
     SELECT 
       dp.*,
       u.first_name, u.last_name, u.email, u.phone, u.avatar_url,
@@ -191,21 +207,31 @@ export function getDoctorById(userId: string): (DoctorProfile & { services: Serv
     LEFT JOIN specialties s ON dp.specialty_id = s.id
     LEFT JOIN clinics c ON dp.clinic_id = c.id
     WHERE dp.user_id = ?
-  `).get(userId) as any;
+  `,
+    )
+    .get(userId) as any;
 
   if (!r) return null;
 
-  const services = db.prepare(`
+  const services = db
+    .prepare(
+      `
     SELECT * FROM services WHERE specialty_id = ? ORDER BY standard_fee ASC
-  `).all(r.specialty_id) as any[];
+  `,
+    )
+    .all(r.specialty_id) as any[];
 
-  const reviews = db.prepare(`
+  const reviews = db
+    .prepare(
+      `
     SELECT rev.*, u.first_name || ' ' || substr(u.last_name, 1, 1) || '.' as patient_name
     FROM reviews rev
     JOIN users u ON rev.patient_id = u.id
     WHERE rev.doctor_id = ?
     ORDER BY rev.created_at DESC
-  `).all(userId) as any[];
+  `,
+    )
+    .all(userId) as any[];
 
   return {
     userId: r.user_id,
@@ -263,40 +289,48 @@ export function getDoctorById(userId: string): (DoctorProfile & { services: Serv
 export function getAvailableSlots(
   doctorId: string,
   dateStr: string, // YYYY-MM-DD
-  consultationType: ConsultationType
+  consultationType: ConsultationType,
 ): string[] {
   const db = getDb();
-  const dateObj = new Date(dateStr + "T00:00:00Z");
-  const dayOfWeek = dateObj.getUTCDay(); // 0 is Sunday, 1 is Monday...
-
-  // Sunday or Saturday outside clinic hours might have no slots
-  if (dayOfWeek === 0) return [];
-
+  if (
+    !validDate(dateStr) ||
+    dateStr < clinicDate() ||
+    !["IN_PERSON", "TELEHEALTH"].includes(consultationType)
+  )
+    return [];
+  const doctor = getDoctorById(doctorId);
+  if (
+    !doctor?.isActive ||
+    (consultationType === "TELEHEALTH"
+      ? !doctor.telehealthAvailable
+      : !doctor.inPersonAvailable)
+  )
+    return [];
+  const dayOfWeek = new Date(dateStr + "T00:00:00Z").getUTCDay();
   // Query doctor availability blocks
   const isTele = consultationType === "TELEHEALTH" ? 1 : 0;
-  let blocks = db.prepare(`
+  const blocks = db
+    .prepare(
+      `
     SELECT * FROM doctor_availabilities
     WHERE doctor_id = ? AND day_of_week = ? AND is_telehealth = ?
-  `).all(doctorId, dayOfWeek, isTele) as any[];
+  `,
+    )
+    .all(doctorId, dayOfWeek, isTele) as any[];
 
-  // Fallback if no specific telehealth block, use general block
-  if (blocks.length === 0) {
-    blocks = db.prepare(`
-      SELECT * FROM doctor_availabilities
-      WHERE doctor_id = ? AND day_of_week = ?
-    `).all(doctorId, dayOfWeek) as any[];
-  }
-
-  if (blocks.length === 0) {
-    // Default standard hours 09:00 - 16:30
-    blocks = [{ start_time: "09:00", end_time: "17:00", slot_duration_minutes: 30 }];
-  }
-
+  if (blocks.length === 0) return [];
   // Find existing bookings on this date for this doctor that are not cancelled
-  const bookedAppointments = db.prepare(`
-    SELECT scheduled_time FROM appointments
+  const bookedAppointments = db
+    .prepare(
+      `
+    SELECT scheduled_time, duration_minutes FROM appointments
     WHERE doctor_id = ? AND scheduled_date = ? AND status NOT IN ('CANCELLED', 'NO_SHOW')
-  `).all(doctorId, dateStr) as { scheduled_time: string }[];
+  `,
+    )
+    .all(doctorId, dateStr) as {
+    scheduled_time: string;
+    duration_minutes: number;
+  }[];
 
   const bookedSet = new Set(bookedAppointments.map((b) => b.scheduled_time));
 
@@ -316,20 +350,33 @@ export function getAvailableSlots(
       const slotTime = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 
       // Check not booked
-      if (!bookedSet.has(slotTime)) {
+      if (
+        !(dateStr === clinicDate() && slotTime <= clinicTime()) &&
+        !bookedAppointments.some((a) => {
+          const [h, m] = a.scheduled_time.split(":").map(Number);
+          const start = h * 60 + m;
+          return (
+            currentMinutes < start + a.duration_minutes &&
+            currentMinutes + duration > start
+          );
+        })
+      ) {
         slots.push(slotTime);
       }
       currentMinutes += duration;
     }
   }
 
-  return slots;
+  return [...new Set(slots)].sort();
 }
 
 // ==========================================
 // APPOINTMENTS
 // ==========================================
-export function getAppointmentsForUser(userId: string, role: string): Appointment[] {
+export function getAppointmentsForUser(
+  userId: string,
+  role: string,
+): Appointment[] {
   const db = getDb();
   let query = `
     SELECT 
@@ -368,7 +415,9 @@ export function getAppointmentsForUser(userId: string, role: string): Appointmen
 
 export function getAppointmentById(id: string): Appointment | null {
   const db = getDb();
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT 
       a.*,
       pu.first_name as patient_first_name, pu.last_name as patient_last_name, pu.email as patient_email, pu.phone as patient_phone,
@@ -386,7 +435,9 @@ export function getAppointmentById(id: string): Appointment | null {
     LEFT JOIN clinics c ON a.clinic_id = c.id
     LEFT JOIN services srv ON a.service_id = srv.id
     WHERE a.id = ? OR a.reference_no = ?
-  `).get(id, id) as any;
+  `,
+    )
+    .get(id, id) as any;
 
   if (!row) return null;
   return mapAppointmentRow(row);
@@ -443,33 +494,76 @@ export function createAppointment(data: {
 }): { success: boolean; appointmentId?: string; error?: string } {
   const db = getDb();
 
-  // Validate date is not in the past
-  const today = new Date().toISOString().split("T")[0];
-  if (data.scheduledDate < today) {
-    return { success: false, error: "Cannot book appointments in the past." };
-  }
-
+  if (
+    !validDate(data.scheduledDate) ||
+    !validTime(data.scheduledTime) ||
+    !["IN_PERSON", "TELEHEALTH"].includes(data.consultationType)
+  )
+    return {
+      success: false,
+      error: "Invalid date, time or consultation format.",
+    };
+  const doctor = getDoctorById(data.doctorId);
+  if (!doctor?.isActive || doctor.clinicId !== data.clinicId)
+    return { success: false, error: "Select the physician’s assigned clinic." };
+  if (data.serviceId && !doctor.services.some((s) => s.id === data.serviceId))
+    return {
+      success: false,
+      error: "Service is not offered by this physician.",
+    };
+  if (
+    !getAvailableSlots(
+      data.doctorId,
+      data.scheduledDate,
+      data.consultationType,
+    ).includes(data.scheduledTime)
+  )
+    return {
+      success: false,
+      error: "This time is unavailable. Choose another slot.",
+    };
+  const block = db
+    .prepare(
+      "SELECT slot_duration_minutes FROM doctor_availabilities WHERE doctor_id=? AND day_of_week=? AND is_telehealth=? AND start_time<=? AND end_time>?",
+    )
+    .get(
+      data.doctorId,
+      new Date(data.scheduledDate + "T00:00:00Z").getUTCDay(),
+      data.consultationType === "TELEHEALTH" ? 1 : 0,
+      data.scheduledTime,
+      data.scheduledTime,
+    ) as { slot_duration_minutes: number };
   // Check double booking
-  const existing = db.prepare(`
+  const existing = db
+    .prepare(
+      `
     SELECT id FROM appointments
     WHERE doctor_id = ? AND scheduled_date = ? AND scheduled_time = ? AND status NOT IN ('CANCELLED', 'NO_SHOW')
-  `).get(data.doctorId, data.scheduledDate, data.scheduledTime);
+  `,
+    )
+    .get(data.doctorId, data.scheduledDate, data.scheduledTime);
 
   if (existing) {
-    return { success: false, error: "This time slot was just taken. Please pick another available time or join the waitlist." };
+    return {
+      success: false,
+      error:
+        "This time slot was just taken. Please pick another available time or join the waitlist.",
+    };
   }
 
   const id = `apt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-  const refNo = `VELA-${Math.floor(10000 + Math.random() * 90000)}`;
+  const refNo = `VELA-${randomUUID().slice(0, 8).toUpperCase()}`;
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO appointments (
       id, reference_no, patient_id, doctor_id, clinic_id, service_id,
       scheduled_date, scheduled_time, duration_minutes, consultation_type,
       status, reason, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     refNo,
     data.patientId,
@@ -478,93 +572,144 @@ export function createAppointment(data: {
     data.serviceId || null,
     data.scheduledDate,
     data.scheduledTime,
-    30,
+    block.slot_duration_minutes,
     data.consultationType,
     "CONFIRMED",
     data.reason,
     now,
-    now
+    now,
   );
 
   // Status history
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO appointment_status_history (id, appointment_id, status, note, changed_by, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(`ash-${Date.now()}`, id, "CONFIRMED", "Booked and confirmed", data.patientId, now);
+  `,
+  ).run(
+    `ash-${randomUUID()}`,
+    id,
+    "CONFIRMED",
+    "Booked and confirmed",
+    data.patientId,
+    now,
+  );
 
   // Notification for patient
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO notifications (id, user_id, title, message, type, link, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    `notif-${Date.now()}-1`,
+  `,
+  ).run(
+    `notif-${randomUUID()}`,
     data.patientId,
     "Appointment Confirmed",
     `Your appointment has been confirmed for ${data.scheduledDate} at ${data.scheduledTime}. Reference: ${refNo}.`,
     "APPOINTMENT",
     `/patient/appointments/${id}`,
-    now
+    now,
   );
 
   // Notification for doctor
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO notifications (id, user_id, title, message, type, link, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    `notif-${Date.now()}-2`,
+  `,
+  ).run(
+    `notif-${randomUUID()}`,
     data.doctorId,
     "New Patient Scheduled",
     `A new appointment has been scheduled for ${data.scheduledDate} at ${data.scheduledTime}.`,
     "APPOINTMENT",
     `/doctor/appointments`,
-    now
+    now,
   );
 
   // Create initial conversation if not exists
-  const existingConv = db.prepare(`
+  const existingConv = db
+    .prepare(
+      `
     SELECT id FROM conversations WHERE patient_id = ? AND doctor_id = ?
-  `).get(data.patientId, data.doctorId) as { id: string } | undefined;
+  `,
+    )
+    .get(data.patientId, data.doctorId) as { id: string } | undefined;
 
   if (!existingConv) {
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO conversations (id, appointment_id, patient_id, doctor_id, last_message_at)
       VALUES (?, ?, ?, ?, ?)
-    `).run(`conv-${Date.now()}`, id, data.patientId, data.doctorId, now);
+    `,
+    ).run(`conv-${randomUUID()}`, id, data.patientId, data.doctorId, now);
   }
 
   return { success: true, appointmentId: id };
 }
 
 // Digital Check-in
-export function performDigitalCheckIn(appointmentId: string, patientId: string): boolean {
+export function performDigitalCheckIn(
+  appointmentId: string,
+  patientId: string,
+): boolean {
   const db = getDb();
-  const apt = db.prepare("SELECT * FROM appointments WHERE id = ?").get(appointmentId) as any;
-  if (!apt || apt.patient_id !== patientId) return false;
+  const apt = db
+    .prepare("SELECT * FROM appointments WHERE id = ?")
+    .get(appointmentId) as any;
+  if (
+    !apt ||
+    apt.patient_id !== patientId ||
+    !["CONFIRMED", "UPCOMING"].includes(apt.status)
+  )
+    return false;
+  if (
+    apt.scheduled_date !== clinicDate() ||
+    apt.consultation_type !== "IN_PERSON"
+  )
+    return false;
+  const [h, m] = clinicTime().split(":").map(Number);
+  const [ah, am] = apt.scheduled_time.split(":").map(Number);
+  if (h * 60 + m < ah * 60 + am - 20 || h * 60 + m > ah * 60 + am + 30)
+    return false;
 
   const now = new Date().toISOString();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE appointments 
     SET status = 'CHECKED_IN', checked_in_at = ?, updated_at = ?
     WHERE id = ?
-  `).run(now, now, appointmentId);
+  `,
+  ).run(now, now, appointmentId);
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO appointment_status_history (id, appointment_id, status, note, changed_by, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(`ash-${Date.now()}`, appointmentId, "CHECKED_IN", "Digital check-in completed by patient", patientId, now);
+  `,
+  ).run(
+    `ash-${randomUUID()}`,
+    appointmentId,
+    "CHECKED_IN",
+    "Digital check-in completed by patient",
+    patientId,
+    now,
+  );
 
   // Notify doctor
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO notifications (id, user_id, title, message, type, link, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    `notif-${Date.now()}`,
+  `,
+  ).run(
+    `notif-${randomUUID()}`,
     apt.doctor_id,
     "Patient Checked In",
     "Your patient has checked in and is seated in the waiting area.",
     "APPOINTMENT",
     `/doctor/workspace/${appointmentId}`,
-    now
+    now,
   );
 
   return true;
@@ -575,23 +720,36 @@ export function updateAppointmentStatus(
   appointmentId: string,
   newStatus: string,
   changedBy: string,
-  note?: string
+  note?: string,
 ): boolean {
   const db = getDb();
-  const apt = db.prepare("SELECT * FROM appointments WHERE id = ?").get(appointmentId) as any;
+  const apt = db
+    .prepare("SELECT * FROM appointments WHERE id = ?")
+    .get(appointmentId) as any;
   if (!apt) return false;
 
   const now = new Date().toISOString();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE appointments 
     SET status = ?, updated_at = ?
     WHERE id = ?
-  `).run(newStatus, now, appointmentId);
+  `,
+  ).run(newStatus, now, appointmentId);
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO appointment_status_history (id, appointment_id, status, note, changed_by, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(`ash-${Date.now()}`, appointmentId, newStatus, note || `Status updated to ${newStatus}`, changedBy, now);
+  `,
+  ).run(
+    `ash-${randomUUID()}`,
+    appointmentId,
+    newStatus,
+    note || `Status updated to ${newStatus}`,
+    changedBy,
+    now,
+  );
 
   return true;
 }
@@ -605,54 +763,83 @@ export function saveClinicalConsultation(
     prescription?: string;
     followUpInstructions?: string;
     markCompleted: boolean;
-  }
+  },
 ): boolean {
   const db = getDb();
-  const apt = db.prepare("SELECT * FROM appointments WHERE id = ?").get(appointmentId) as any;
-  if (!apt || apt.doctor_id !== doctorId) return false;
+  const apt = db
+    .prepare("SELECT * FROM appointments WHERE id = ?")
+    .get(appointmentId) as any;
+  if (
+    !apt ||
+    apt.doctor_id !== doctorId ||
+    ["CANCELLED", "NO_SHOW", "COMPLETED"].includes(apt.status)
+  )
+    return false;
 
   const now = new Date().toISOString();
   const newStatus = data.markCompleted ? "COMPLETED" : "IN_CONSULTATION";
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE appointments 
     SET clinical_notes = ?, prescription = ?, follow_up_instructions = ?, status = ?, updated_at = ?
     WHERE id = ?
-  `).run(data.clinicalNotes, data.prescription || null, data.followUpInstructions || null, newStatus, now, appointmentId);
+  `,
+  ).run(
+    data.clinicalNotes,
+    data.prescription || null,
+    data.followUpInstructions || null,
+    newStatus,
+    now,
+    appointmentId,
+  );
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO appointment_status_history (id, appointment_id, status, note, changed_by, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(`ash-${Date.now()}`, appointmentId, newStatus, `Clinical notes saved. Consultation ${newStatus.toLowerCase()}.`, doctorId, now);
+  `,
+  ).run(
+    `ash-${randomUUID()}`,
+    appointmentId,
+    newStatus,
+    `Clinical notes saved. Consultation ${newStatus.toLowerCase()}.`,
+    doctorId,
+    now,
+  );
 
   if (data.markCompleted) {
     // Generate patient document for visit summary
-    const docId = `doc-${Date.now()}`;
-    db.prepare(`
+    const docId = `doc-${randomUUID()}`;
+    db.prepare(
+      `
       INSERT INTO patient_documents (id, patient_id, appointment_id, title, doc_type, file_path_or_summary, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `,
+    ).run(
       docId,
       apt.patient_id,
       appointmentId,
       `Clinical Visit Summary — ${apt.scheduled_date}`,
       "VISIT_SUMMARY",
       `Diagnosis & Notes: ${data.clinicalNotes}\nPrescription: ${data.prescription || "None"}\nFollow-Up: ${data.followUpInstructions || "As needed"}`,
-      now
+      now,
     );
 
     // Notify patient
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO notifications (id, user_id, title, message, type, link, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      `notif-${Date.now()}`,
+    `,
+    ).run(
+      `notif-${randomUUID()}`,
       apt.patient_id,
       "Consultation Summary Ready",
       "Your doctor has finalized your visit summary and instructions. Tap to review.",
       "DOCUMENT",
       `/patient/documents`,
-      now
+      now,
     );
   }
 
@@ -664,7 +851,9 @@ export function saveClinicalConsultation(
 // ==========================================
 export function getConversationsForUser(userId: string): Conversation[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT 
       c.*,
       pu.first_name as patient_first_name, pu.last_name as patient_last_name, pu.avatar_url as patient_avatar,
@@ -679,7 +868,9 @@ export function getConversationsForUser(userId: string): Conversation[] {
     LEFT JOIN specialties s ON dp.specialty_id = s.id
     WHERE c.patient_id = ? OR c.doctor_id = ?
     ORDER BY c.last_message_at DESC
-  `).all(userId, userId, userId) as any[];
+  `,
+    )
+    .all(userId, userId, userId) as any[];
 
   return rows.map((r) => ({
     id: r.id,
@@ -697,21 +888,36 @@ export function getConversationsForUser(userId: string): Conversation[] {
   }));
 }
 
-export function getMessagesForConversation(conversationId: string, currentUserId: string): Message[] {
+export function getMessagesForConversation(
+  conversationId: string,
+  currentUserId: string,
+): Message[] {
   const db = getDb();
 
+  const conversation = db
+    .prepare(
+      "SELECT id FROM conversations WHERE id=? AND (patient_id=? OR doctor_id=?)",
+    )
+    .get(conversationId, currentUserId, currentUserId);
+  if (!conversation) return [];
   // Mark unread messages as read
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE messages SET read_at = ? WHERE conversation_id = ? AND recipient_id = ? AND read_at IS NULL
-  `).run(new Date().toISOString(), conversationId, currentUserId);
+  `,
+  ).run(new Date().toISOString(), conversationId, currentUserId);
 
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT m.*, u.first_name, u.last_name, u.role
     FROM messages m
     JOIN users u ON m.sender_id = u.id
     WHERE m.conversation_id = ?
     ORDER BY m.created_at ASC
-  `).all(conversationId) as any[];
+  `,
+    )
+    .all(conversationId) as any[];
 
   return rows.map((r) => ({
     id: r.id,
@@ -721,7 +927,10 @@ export function getMessagesForConversation(conversationId: string, currentUserId
     content: r.content,
     readAt: r.read_at,
     createdAt: r.created_at,
-    senderName: r.role === "DOCTOR" ? `Dr. ${r.first_name} ${r.last_name}` : `${r.first_name} ${r.last_name}`,
+    senderName:
+      r.role === "DOCTOR"
+        ? `Dr. ${r.first_name} ${r.last_name}`
+        : `${r.first_name} ${r.last_name}`,
     senderRole: r.role,
   }));
 }
@@ -732,34 +941,44 @@ export function sendInAppMessage(data: {
   content: string;
 }): Message | null {
   const db = getDb();
-  const conv = db.prepare("SELECT * FROM conversations WHERE id = ?").get(data.conversationId) as any;
-  if (!conv) return null;
+  const conv = db
+    .prepare("SELECT * FROM conversations WHERE id = ?")
+    .get(data.conversationId) as any;
+  if (!conv || ![conv.patient_id, conv.doctor_id].includes(data.senderId))
+    return null;
 
-  const recipientId = conv.patient_id === data.senderId ? conv.doctor_id : conv.patient_id;
+  const recipientId =
+    conv.patient_id === data.senderId ? conv.doctor_id : conv.patient_id;
   const now = new Date().toISOString();
   const id = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO messages (id, conversation_id, sender_id, recipient_id, content, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(id, data.conversationId, data.senderId, recipientId, data.content, now);
+  `,
+  ).run(id, data.conversationId, data.senderId, recipientId, data.content, now);
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE conversations SET last_message_at = ? WHERE id = ?
-  `).run(now, data.conversationId);
+  `,
+  ).run(now, data.conversationId);
 
   // Notify recipient
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO notifications (id, user_id, title, message, type, link, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    `notif-${Date.now()}`,
+  `,
+  ).run(
+    `notif-${randomUUID()}`,
     recipientId,
     "New Healthcare Message",
     data.content.length > 50 ? `${data.content.slice(0, 50)}...` : data.content,
     "MESSAGE",
-    `/messages?conv=${data.conversationId}`,
-    now
+    `${conv.patient_id === recipientId ? "/patient" : "/doctor"}/messages`,
+    now,
   );
 
   return {
@@ -777,9 +996,13 @@ export function sendInAppMessage(data: {
 // ==========================================
 export function getNotificationsForUser(userId: string): Notification[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 30
-  `).all(userId) as any[];
+  `,
+    )
+    .all(userId) as any[];
 
   return rows.map((r) => ({
     id: r.id,
@@ -795,7 +1018,9 @@ export function getNotificationsForUser(userId: string): Notification[] {
 
 export function markNotificationRead(id: string, userId: string): void {
   const db = getDb();
-  db.prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?").run(id, userId);
+  db.prepare(
+    "UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?",
+  ).run(id, userId);
 }
 
 // ==========================================
@@ -809,34 +1034,72 @@ export function submitReview(data: {
   comment?: string;
 }): { success: boolean; error?: string } {
   const db = getDb();
-  const apt = db.prepare("SELECT * FROM appointments WHERE id = ?").get(data.appointmentId) as any;
+  const apt = db
+    .prepare("SELECT * FROM appointments WHERE id = ?")
+    .get(data.appointmentId) as any;
   if (!apt) return { success: false, error: "Appointment not found." };
-  if (apt.patient_id !== data.patientId) return { success: false, error: "Unauthorized." };
+  if (apt.patient_id !== data.patientId)
+    return { success: false, error: "Unauthorized." };
   if (apt.status !== "COMPLETED") {
-    return { success: false, error: "Reviews can only be submitted for completed consultations." };
+    return {
+      success: false,
+      error: "Reviews can only be submitted for completed consultations.",
+    };
   }
 
-  const existing = db.prepare("SELECT id FROM reviews WHERE appointment_id = ?").get(data.appointmentId);
+  if (
+    ![data.doctorRating, data.clinicRating].every(
+      (n) => Number.isInteger(n) && n >= 1 && n <= 5,
+    )
+  )
+    return {
+      success: false,
+      error: "Ratings must be whole numbers between 1 and 5.",
+    };
+  const existing = db
+    .prepare("SELECT id FROM reviews WHERE appointment_id = ?")
+    .get(data.appointmentId);
   if (existing) {
-    return { success: false, error: "You have already submitted a review for this appointment." };
+    return {
+      success: false,
+      error: "You have already submitted a review for this appointment.",
+    };
   }
 
-  const id = `rev-${Date.now()}`;
+  const id = `rev-${randomUUID()}`;
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO reviews (id, appointment_id, patient_id, doctor_id, clinic_id, doctor_rating, clinic_rating, comment, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, data.appointmentId, data.patientId, apt.doctor_id, apt.clinic_id, data.doctorRating, data.clinicRating, data.comment || null, now);
+  `,
+  ).run(
+    id,
+    data.appointmentId,
+    data.patientId,
+    apt.doctor_id,
+    apt.clinic_id,
+    data.doctorRating,
+    data.clinicRating,
+    data.comment || null,
+    now,
+  );
 
   // Recalculate doctor rating
-  const avg = db.prepare(`
+  const avg = db
+    .prepare(
+      `
     SELECT AVG(doctor_rating) as avg_rating, COUNT(*) as count FROM reviews WHERE doctor_id = ?
-  `).get(apt.doctor_id) as { avg_rating: number; count: number };
+  `,
+    )
+    .get(apt.doctor_id) as { avg_rating: number; count: number };
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE doctor_profiles SET rating = ?, review_count = ? WHERE user_id = ?
-  `).run(Number(avg.avg_rating.toFixed(2)), avg.count, apt.doctor_id);
+  `,
+  ).run(Number(avg.avg_rating.toFixed(2)), avg.count, apt.doctor_id);
 
   return { success: true };
 }
@@ -853,20 +1116,33 @@ export function joinWaitlist(data: {
   notes?: string;
 }): { success: boolean; id: string } {
   const db = getDb();
-  const id = `wt-${Date.now()}`;
+  const id = `wt-${randomUUID()}`;
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO waitlists (id, patient_id, doctor_id, preferred_start_date, preferred_end_date, preferred_time_range, notes, status, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)
-  `).run(id, data.patientId, data.doctorId, data.preferredStartDate, data.preferredEndDate, data.preferredTimeRange, data.notes || null, now);
+  `,
+  ).run(
+    id,
+    data.patientId,
+    data.doctorId,
+    data.preferredStartDate,
+    data.preferredEndDate,
+    data.preferredTimeRange,
+    data.notes || null,
+    now,
+  );
 
   return { success: true, id };
 }
 
 export function getWaitlistForPatient(patientId: string): WaitlistEntry[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT w.*, du.first_name, du.last_name, s.name as specialty_name
     FROM waitlists w
     JOIN users du ON w.doctor_id = du.id
@@ -874,7 +1150,9 @@ export function getWaitlistForPatient(patientId: string): WaitlistEntry[] {
     LEFT JOIN specialties s ON dp.specialty_id = s.id
     WHERE w.patient_id = ?
     ORDER BY w.created_at DESC
-  `).all(patientId) as any[];
+  `,
+    )
+    .all(patientId) as any[];
 
   return rows.map((r) => ({
     id: r.id,
@@ -896,9 +1174,13 @@ export function getWaitlistForPatient(patientId: string): WaitlistEntry[] {
 // ==========================================
 export function getPatientDocuments(patientId: string): PatientDocument[] {
   const db = getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT * FROM patient_documents WHERE patient_id = ? ORDER BY created_at DESC
-  `).all(patientId) as any[];
+  `,
+    )
+    .all(patientId) as any[];
 
   return rows.map((r) => ({
     id: r.id,
@@ -914,33 +1196,58 @@ export function getPatientDocuments(patientId: string): PatientDocument[] {
 // ==========================================
 // SAVED ITEMS
 // ==========================================
-export function getSavedItemsForPatient(patientId: string): { doctors: DoctorProfile[]; clinics: Clinic[] } {
+export function getSavedItemsForPatient(patientId: string): {
+  doctors: DoctorProfile[];
+  clinics: Clinic[];
+} {
   const db = getDb();
-  const saved = db.prepare("SELECT * FROM saved_items WHERE patient_id = ?").all(patientId) as any[];
+  const saved = db
+    .prepare("SELECT * FROM saved_items WHERE patient_id = ?")
+    .all(patientId) as any[];
 
-  const docIds = saved.filter((s) => s.item_type === "DOCTOR").map((s) => s.item_id);
-  const clinicIds = saved.filter((s) => s.item_type === "CLINIC").map((s) => s.item_id);
+  const docIds = saved
+    .filter((s) => s.item_type === "DOCTOR")
+    .map((s) => s.item_id);
+  const clinicIds = saved
+    .filter((s) => s.item_type === "CLINIC")
+    .map((s) => s.item_id);
 
-  const doctors = docIds.map((id) => getDoctorById(id)).filter(Boolean) as DoctorProfile[];
-  const clinics = clinicIds.map((id) => getClinicById(id)).filter(Boolean) as Clinic[];
+  const doctors = docIds
+    .map((id) => getDoctorById(id))
+    .filter(Boolean) as DoctorProfile[];
+  const clinics = clinicIds
+    .map((id) => getClinicById(id))
+    .filter(Boolean) as Clinic[];
 
   return { doctors, clinics };
 }
 
-export function toggleSavedItem(patientId: string, itemType: "DOCTOR" | "CLINIC", itemId: string): boolean {
+export function toggleSavedItem(
+  patientId: string,
+  itemType: "DOCTOR" | "CLINIC",
+  itemId: string,
+): boolean {
   const db = getDb();
-  const existing = db.prepare("SELECT id FROM saved_items WHERE patient_id = ? AND item_type = ? AND item_id = ?").get(patientId, itemType, itemId);
+  const existing = db
+    .prepare(
+      "SELECT id FROM saved_items WHERE patient_id = ? AND item_type = ? AND item_id = ?",
+    )
+    .get(patientId, itemType, itemId);
 
   if (existing) {
-    db.prepare("DELETE FROM saved_items WHERE patient_id = ? AND item_type = ? AND item_id = ?").run(patientId, itemType, itemId);
+    db.prepare(
+      "DELETE FROM saved_items WHERE patient_id = ? AND item_type = ? AND item_id = ?",
+    ).run(patientId, itemType, itemId);
     return false; // Removed
   } else {
-    db.prepare("INSERT INTO saved_items (id, patient_id, item_type, item_id, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      `sav-${Date.now()}`,
+    db.prepare(
+      "INSERT INTO saved_items (id, patient_id, item_type, item_id, created_at) VALUES (?, ?, ?, ?, ?)",
+    ).run(
+      `sav-${randomUUID()}`,
       patientId,
       itemType,
       itemId,
-      new Date().toISOString()
+      new Date().toISOString(),
     );
     return true; // Added
   }
@@ -951,32 +1258,71 @@ export function toggleSavedItem(patientId: string, itemType: "DOCTOR" | "CLINIC"
 // ==========================================
 export function getAdminOperationsBoard() {
   const db = getDb();
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = clinicDate();
 
   const todayAppointments = getAppointmentsForUser("", "ADMIN").filter(
-    (a) => a.scheduledDate === todayStr || a.status === "CHECKED_IN" || a.status === "IN_CONSULTATION"
+    (a) =>
+      a.scheduledDate === todayStr ||
+      a.status === "CHECKED_IN" ||
+      a.status === "IN_CONSULTATION",
   );
 
   return {
     checkedIn: todayAppointments.filter((a) => a.status === "CHECKED_IN"),
-    waiting: todayAppointments.filter((a) => a.status === "UPCOMING" || a.status === "CONFIRMED"),
-    inConsultation: todayAppointments.filter((a) => a.status === "IN_CONSULTATION"),
+    waiting: todayAppointments.filter(
+      (a) => a.status === "UPCOMING" || a.status === "CONFIRMED",
+    ),
+    inConsultation: todayAppointments.filter(
+      (a) => a.status === "IN_CONSULTATION",
+    ),
     completed: todayAppointments.filter((a) => a.status === "COMPLETED"),
-    delayed: todayAppointments.filter((a) => a.status === "RESCHEDULED" || (a.status === "REQUESTED" && a.scheduledDate <= todayStr)),
+    delayed: todayAppointments.filter(
+      (a) =>
+        a.status === "RESCHEDULED" ||
+        (a.status === "REQUESTED" && a.scheduledDate <= todayStr),
+    ),
   };
 }
 
 export function getAdminOverviewMetrics() {
   const db = getDb();
-  const totalAppointments = (db.prepare("SELECT COUNT(*) as count FROM appointments").get() as any).count;
-  const activeDoctors = (db.prepare("SELECT COUNT(*) as count FROM doctor_profiles WHERE is_active = 1").get() as any).count;
-  const totalClinics = (db.prepare("SELECT COUNT(*) as count FROM clinics").get() as any).count;
-  const totalPatients = (db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'PATIENT'").get() as any).count;
-  const checkedInNow = (db.prepare("SELECT COUNT(*) as count FROM appointments WHERE status = 'CHECKED_IN'").get() as any).count;
-  const inConsultationNow = (db.prepare("SELECT COUNT(*) as count FROM appointments WHERE status = 'IN_CONSULTATION'").get() as any).count;
+  const totalAppointments = (
+    db.prepare("SELECT COUNT(*) as count FROM appointments").get() as any
+  ).count;
+  const activeDoctors = (
+    db
+      .prepare(
+        "SELECT COUNT(*) as count FROM doctor_profiles WHERE is_active = 1",
+      )
+      .get() as any
+  ).count;
+  const totalClinics = (
+    db.prepare("SELECT COUNT(*) as count FROM clinics").get() as any
+  ).count;
+  const totalPatients = (
+    db
+      .prepare("SELECT COUNT(*) as count FROM users WHERE role = 'PATIENT'")
+      .get() as any
+  ).count;
+  const checkedInNow = (
+    db
+      .prepare(
+        "SELECT COUNT(*) as count FROM appointments WHERE status = 'CHECKED_IN'",
+      )
+      .get() as any
+  ).count;
+  const inConsultationNow = (
+    db
+      .prepare(
+        "SELECT COUNT(*) as count FROM appointments WHERE status = 'IN_CONSULTATION'",
+      )
+      .get() as any
+  ).count;
 
   // Specialty breakdown
-  const specialtyStats = db.prepare(`
+  const specialtyStats = db
+    .prepare(
+      `
     SELECT s.name, COUNT(a.id) as count
     FROM specialties s
     JOIN doctor_profiles dp ON s.id = dp.specialty_id
@@ -984,7 +1330,9 @@ export function getAdminOverviewMetrics() {
     GROUP BY s.id
     ORDER BY count DESC
     LIMIT 5
-  `).all() as { name: string; count: number }[];
+  `,
+    )
+    .all() as { name: string; count: number }[];
 
   return {
     totalAppointments,
@@ -999,7 +1347,9 @@ export function getAdminOverviewMetrics() {
 
 export function getAuditLogs(): AuditLog[] {
   const db = getDb();
-  const rows = db.prepare("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 50").all() as any[];
+  const rows = db
+    .prepare("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 50")
+    .all() as any[];
   return rows.map((r) => ({
     id: r.id,
     userId: r.user_id,

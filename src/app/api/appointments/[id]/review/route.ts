@@ -4,7 +4,7 @@ import { submitReview } from "@/lib/data";
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = await getSessionUser();
@@ -16,8 +16,20 @@ export async function POST(
     const body = await request.json();
     const { doctorRating, clinicRating, comment } = body;
 
-    if (!doctorRating || !clinicRating) {
-      return NextResponse.json({ error: "Ratings are required." }, { status: 400 });
+    if (
+      !Number.isInteger(doctorRating) ||
+      !Number.isInteger(clinicRating) ||
+      doctorRating < 1 ||
+      doctorRating > 5 ||
+      clinicRating < 1 ||
+      clinicRating > 5 ||
+      (comment !== undefined &&
+        (typeof comment !== "string" || comment.length > 2000))
+    ) {
+      return NextResponse.json(
+        { error: "Ratings are required." },
+        { status: 400 },
+      );
     }
 
     const result = submitReview({

@@ -1,57 +1,57 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getAppointmentById, updateAppointmentStatus } from "@/lib/data";
-import { updateAppointmentStatusInSupabase } from "@/lib/supabase-data";
-import { isSupabaseConfigured } from "@/lib/supabase";
-
+import { canAccessAppointment, canChangeStatus } from "@/lib/permissions";
+import { getDb } from "@/lib/db";
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    const { id } = await params;
-    const apt = getAppointmentById(id);
-    if (!apt) {
-      return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
-    }
-    return NextResponse.json({ appointment: apt });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  const user = await getSessionUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
+  const appointment = getAppointmentById(id);
+  if (!appointment || !canAccessAppointment(user, appointment))
+    return NextResponse.json(
+      { error: "Appointment not found" },
+      { status: 404 },
+    );
+  return NextResponse.json(
+    { appointment },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
 }
-
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    const user = await getSessionUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const body = await request.json();
-    const { status, note } = body;
-
-    if (!status) {
-      return NextResponse.json({ error: "New status is required" }, { status: 400 });
-    }
-
-    if (isSupabaseConfigured()) {
-      const supaOk = await updateAppointmentStatusInSupabase(id, status, user.id, note);
-      if (supaOk) {
-        return NextResponse.json({ success: true, status });
-      }
-    }
-
-    const ok = updateAppointmentStatus(id, status, user.id, note);
-    if (!ok) {
-      return NextResponse.json({ error: "Failed to update appointment status" }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true, status });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  const user = await getSessionUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object")
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  const { status, note } = body;
+  const result = getDb()
+    .transaction(() => {
+      const a = getAppointmentById(id);
+      if (!a || !canAccessAppointment(user, a)) return 404;
+      if (typeof note !== "undefined" && typeof note !== "string") return 400;
+      if (!canChangeStatus(user, a, status)) return 403;
+      return updateAppointmentStatus(a.id, status, user.id, note) ? 200 : 400;
+    })
+    .immediate();
+  return NextResponse.json(
+    result === 200
+      ? { success: true, status }
+      : {
+          error:
+            result === 404
+              ? "Appointment not found"
+              : "This status change is not permitted.",
+        },
+    { status: result },
+  );
 }

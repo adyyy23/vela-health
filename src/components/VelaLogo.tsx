@@ -14,12 +14,21 @@ export default function VelaLogo({
   hideWordmark = false,
 }: VelaLogoProps) {
   // Dimensions based on size
-  const iconBox = size === "sm" ? "w-6 h-6" : size === "lg" ? "w-9 h-9" : "w-7 h-7";
-  const titleSize = size === "sm" ? "text-sm" : size === "lg" ? "text-xl" : "text-base";
-  const subSize = size === "sm" ? "text-[9px]" : size === "lg" ? "text-[11px]" : "text-[10px]";
+  const iconBox =
+    size === "sm" ? "w-6 h-6" : size === "lg" ? "w-9 h-9" : "w-7 h-7";
+  const titleSize =
+    size === "sm" ? "text-sm" : size === "lg" ? "text-xl" : "text-base";
+  const subSize =
+    size === "sm"
+      ? "text-[9px]"
+      : size === "lg"
+        ? "text-[11px]"
+        : "text-[10px]";
 
   return (
-    <div className={`inline-flex items-center gap-2.5 font-sans select-none ${className}`}>
+    <div
+      className={`inline-flex items-center gap-2.5 font-sans select-none ${className}`}
+    >
       {/* VELA Abstract Brand Mark: Geometric V + Vitality Pulse Convergence */}
       <div
         className={`relative flex items-center justify-center rounded-[8px] shrink-0 transition-transform ${

@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { toggleSavedItem, getSavedItemsForPatient } from "@/lib/data";
+import {
+  toggleSavedItem,
+  getSavedItemsForPatient,
+  getDoctorById,
+  getClinicById,
+} from "@/lib/data";
 
 export async function GET() {
   try {
     const user = await getSessionUser();
-    if (!user) {
+    if (!user || user.role !== "PATIENT") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -19,13 +24,20 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user) {
+    if (!user || user.role !== "PATIENT") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { itemType, itemId } = await request.json();
-    if (!itemType || !itemId) {
-      return NextResponse.json({ error: "itemType and itemId are required." }, { status: 400 });
+    if (
+      typeof itemId !== "string" ||
+      !["DOCTOR", "CLINIC"].includes(itemType) ||
+      (itemType === "DOCTOR" ? !getDoctorById(itemId) : !getClinicById(itemId))
+    ) {
+      return NextResponse.json(
+        { error: "itemType and itemId are required." },
+        { status: 400 },
+      );
     }
 
     const isSaved = toggleSavedItem(user.id, itemType, itemId);

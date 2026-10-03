@@ -1,119 +1,50 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { AuditLog } from "@/types";
-import { ShieldCheck, Search, Clock, User, Terminal } from "lucide-react";
-
-export default function AdminAuditPage() {
-  const [logs, setLogs] = useState<AuditLog[]>([
-    {
-      id: "aud-1",
-      userName: "Sarah Jenkins (Admin)",
-      action: "FACILITY_PARAMETER_UPDATE",
-      resource: "CLINIC:clinic-central",
-      details: "Operating hours adjusted for Saturday clinic coverage.",
-      ipAddress: "127.0.0.1",
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: "aud-2",
-      userName: "Maria Santos (Patient)",
-      action: "DIGITAL_CHECK_IN",
-      resource: "APPOINTMENT:apt-today-1",
-      details: "Verified check-in executed via PWA. Reception notified.",
-      ipAddress: "172.56.21.90",
-      createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
-    },
-    {
-      id: "aud-3",
-      userName: "Dr. Elena Reyes",
-      action: "CLINICAL_WORKSPACE_SAVE",
-      resource: "APPOINTMENT:apt-past-1",
-      details: "Visit summary finalized and electronic prescription issued.",
-      ipAddress: "192.168.1.42",
-      createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
-    },
-    {
-      id: "aud-4",
-      userName: "Sarah Jenkins (Admin)",
-      action: "SYSTEM_INITIALIZE",
-      resource: "DATABASE",
-      details: "Initial cryptographic security schema initialized.",
-      ipAddress: "127.0.0.1",
-      createdAt: new Date(Date.now() - 48 * 3600000).toISOString(),
-    },
-  ]);
-
-  const [search, setSearch] = useState("");
-
-  const filtered = logs.filter(
-    (l) =>
-      (l.userName || "").toLowerCase().includes(search.toLowerCase()) ||
-      l.action.toLowerCase().includes(search.toLowerCase()) ||
-      l.resource.toLowerCase().includes(search.toLowerCase())
-  );
-
+import { requireRole } from "@/lib/auth";
+import { getAuditLogs } from "@/lib/data";
+import { PageHeading, EmptyState } from "@/components/CareUI";
+export default async function Activity() {
+  await requireRole(["ADMIN"]);
+  const logs = getAuditLogs();
   return (
-    <div className="flex flex-col gap-6 text-vela-ink">
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E2E8E4] shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-vela-sage block mb-1">
-              Security Compliance
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-vela-ink tracking-tight">
-              Administrative Audit Log
-            </h1>
-            <p className="text-xs text-vela-muted mt-1">
-              Immutable logging of all privilege changes, digital check-ins, and consultation updates.
-            </p>
-          </div>
-
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-vela-muted absolute left-3.5 top-3 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search audit trail..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs font-medium text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-3xl border border-[#E2E8E4] shadow-sm overflow-hidden">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-[#F7F9F7] border-b border-[#E2E8E4] text-vela-muted uppercase font-bold text-[10px] tracking-wider">
-            <tr>
-              <th className="px-5 py-3.5">Actor / User</th>
-              <th className="px-5 py-3.5">Action Executed</th>
-              <th className="px-5 py-3.5">Target Resource</th>
-              <th className="px-5 py-3.5">Details</th>
-              <th className="px-5 py-3.5">Timestamp</th>
-              <th className="px-5 py-3.5">IP Address</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#E2E8E4] text-vela-ink">
-            {filtered.map((l) => (
-              <tr key={l.id} className="hover:bg-[#F7F9F7]/70 transition">
-                <td className="px-5 py-3.5 font-bold text-vela-ink">{l.userName}</td>
-                <td className="px-5 py-3.5">
-                  <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EFF2EF] text-vela-ink border border-[#E2E8E4]">
-                    {l.action}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 font-mono text-[11px] text-vela-forest font-semibold">{l.resource}</td>
-                <td className="px-5 py-3.5 max-w-xs text-vela-muted">{l.details}</td>
-                <td className="px-5 py-3.5 text-vela-muted font-mono text-[11px]">
-                  {new Date(l.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </td>
-                <td className="px-5 py-3.5 font-mono text-vela-muted text-[11px]">{l.ipAddress}</td>
+    <>
+      <PageHeading
+        eyebrow="ACCOUNTABILITY"
+        title="Network activity."
+        description="The most recent 50 recorded actions. Profile, availability, facility and clinician access changes are recorded here."
+      />
+      {logs.length ? (
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th scope="col">When</th>
+                <th scope="col">User</th>
+                <th scope="col">Action</th>
+                <th scope="col">Resource</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {logs.map((l) => (
+                <tr key={l.id}>
+                  <td>
+                    {new Date(l.createdAt).toLocaleString("en-US", {
+                      timeZone: "America/Los_Angeles",
+                    })}{" "}
+                    PT
+                  </td>
+                  <td>{l.userName || "System"}</td>
+                  <td>{l.action.replaceAll("_", " ")}</td>
+                  <td className="break-all">{l.resource}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <EmptyState
+          title="No activity recorded"
+          description="Changes made through the supported management tools will appear here."
+        />
+      )}
+    </>
   );
 }

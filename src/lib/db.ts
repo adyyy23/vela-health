@@ -9,12 +9,16 @@ export function getDb(): Database.Database {
     return dbInstance;
   }
 
-  const dataDir = path.join(process.cwd(), "data");
+  if (process.env.VERCEL && !process.env.VELA_DATABASE_PATH)
+    throw new Error("Persistent database configuration required.");
+  const dbPath =
+    process.env.VELA_DATABASE_PATH ||
+    path.join(process.cwd(), "data", "vela.db");
+  const dataDir = path.dirname(dbPath);
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 
-  const dbPath = path.join(dataDir, "vela.db");
   const db = new Database(dbPath);
 
   // Enable WAL mode for better concurrency and performance
