@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getAppointmentById, updateAppointmentStatus } from "@/lib/data";
+import { updateAppointmentStatusInSupabase } from "@/lib/supabase-data";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 export async function GET(
   request: Request,
@@ -34,6 +36,13 @@ export async function PATCH(
 
     if (!status) {
       return NextResponse.json({ error: "New status is required" }, { status: 400 });
+    }
+
+    if (isSupabaseConfigured()) {
+      const supaOk = await updateAppointmentStatusInSupabase(id, status, user.id, note);
+      if (supaOk) {
+        return NextResponse.json({ success: true, status });
+      }
     }
 
     const ok = updateAppointmentStatus(id, status, user.id, note);

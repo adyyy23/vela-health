@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createAppointment, getAppointmentsForUser } from "@/lib/data";
+import { getAppointmentsFromSupabase, createAppointmentInSupabase } from "@/lib/supabase-data";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 export async function GET() {
   try {
     const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (isSupabaseConfigured()) {
+      const supaApts = await getAppointmentsFromSupabase(user.id, user.role);
+      if (supaApts) {
+        return NextResponse.json({ appointments: supaApts });
+      }
     }
 
     const appointments = getAppointmentsForUser(user.id, user.role);
@@ -28,6 +37,22 @@ export async function POST(request: Request) {
 
     if (!doctorId || !clinicId || !scheduledDate || !scheduledTime || !consultationType || !reason) {
       return NextResponse.json({ error: "All booking fields are required." }, { status: 400 });
+    }
+
+    if (isSupabaseConfigured()) {
+      const supaResult = await createAppointmentInSupabase({
+        patientId: user.id,
+        doctorId,
+        clinicId,
+        serviceId,
+        scheduledDate,
+        scheduledTime,
+        consultationType,
+        reason,
+      });
+      if (supaResult.success) {
+        return NextResponse.json(supaResult);
+      }
     }
 
     const result = createAppointment({
