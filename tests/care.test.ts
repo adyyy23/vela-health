@@ -13,7 +13,9 @@ import { canAccessAppointment, canChangeStatus } from "../src/lib/permissions";
 import type { Appointment, User } from "../src/types";
 const folder = mkdtempSync(join(tmpdir(), "vela-tests-"));
 process.env.VELA_DATABASE_PATH = join(folder, "fixture.db");
-import { getDb } from "../src/lib/db";
+delete process.env.POSTGRES_URL;
+delete process.env.VERCEL;
+import { getDb, getLocalDb } from "../src/lib/db";
 import { seedDatabase } from "../src/lib/seed";
 import * as data from "../src/lib/data";
 test.before(async () => {
@@ -80,46 +82,56 @@ const payload = {
   consultationType: "IN_PERSON" as const,
   reason: "Test appointment",
 };
-test("availability follows published blocks and rejects unsupported/past dates", () => {
+test("availability follows published blocks and rejects unsupported/past dates", async () => {
   assert.deepEqual(
-    data.getAvailableSlots("usr-doc-1", "2000-01-01", "IN_PERSON"),
+    await data.getAvailableSlots("usr-doc-1", "2000-01-01", "IN_PERSON"),
     [],
   );
   assert.deepEqual(
-    data.getAvailableSlots("usr-doc-1", "2099-01-04", "IN_PERSON"),
+    await data.getAvailableSlots("usr-doc-1", "2099-01-04", "IN_PERSON"),
     [],
   );
   assert.ok(
-    data.getAvailableSlots("usr-doc-1", future, "IN_PERSON").includes("09:00"),
+    (await data.getAvailableSlots("usr-doc-1", future, "IN_PERSON")).includes(
+      "09:00",
+    ),
   );
 });
-test("booking validates assigned clinic and blocks duplicate and overlapping slots", () => {
+test("booking validates assigned clinic and blocks duplicate and overlapping slots", async () => {
   assert.equal(
-    data.createAppointment({ ...payload, clinicId: "clinic-marina" }).success,
+    (await data.createAppointment({ ...payload, clinicId: "clinic-marina" }))
+      .success,
     false,
   );
-  const first = db
-    .transaction(() => data.createAppointment(payload))
+  const first = await db
+    .transaction(async () => await data.createAppointment(payload))
     .immediate();
   assert.equal(first.success, true);
   assert.equal(
-    db.transaction(() => data.createAppointment(payload)).immediate().success,
+    (
+      await db
+        .transaction(async () => await data.createAppointment(payload))
+        .immediate()
+    ).success,
     false,
   );
-  db.prepare("UPDATE appointments SET duration_minutes=60 WHERE id=?").run(
-    first.appointmentId,
-  );
+  await db
+    .prepare("UPDATE appointments SET duration_minutes=60 WHERE id=?")
+    .run(first.appointmentId);
   assert.equal(
-    data
-      .getAvailableSlots(payload.doctorId, future, "IN_PERSON")
-      .includes("09:30"),
+    (
+      await data.getAvailableSlots(payload.doctorId, future, "IN_PERSON")
+    ).includes("09:30"),
     false,
   );
 });
-test("unrelated people cannot read or send appointment messages", () => {
-  assert.deepEqual(data.getMessagesForConversation("conv-1", "usr-doc-2"), []);
+test("unrelated people cannot read or send appointment messages", async () => {
+  assert.deepEqual(
+    await data.getMessagesForConversation("conv-1", "usr-doc-2"),
+    [],
+  );
   assert.equal(
-    data.sendInAppMessage({
+    await data.sendInAppMessage({
       conversationId: "conv-1",
       senderId: "usr-doc-2",
       content: "Unauthorized",
@@ -127,18 +139,21 @@ test("unrelated people cannot read or send appointment messages", () => {
     null,
   );
 });
-test("check-in is restricted to the owning patient and arrival window", () => {
+test("check-in is restricted to the owning patient and arrival window", async () => {
   assert.equal(
-    data.performDigitalCheckIn("apt-today-1", "usr-patient-2"),
+    await data.performDigitalCheckIn("apt-today-1", "usr-patient-2"),
     false,
   );
   assert.equal(
-    data.performDigitalCheckIn("apt-upcoming-1", "usr-patient-1"),
+    await data.performDigitalCheckIn("apt-upcoming-1", "usr-patient-1"),
     false,
   );
 });
-test("clinical completion creates one document and cannot be edited by other physicians", () => {
-  const result = data.createAppointment({ ...payload, scheduledTime: "10:30" });
+test("clinical completion creates one document and cannot be edited by other physicians", async () => {
+  const result = await data.createAppointment({
+    ...payload,
+    scheduledTime: "10:30",
+  });
   assert.ok(result.appointmentId);
   const notes = {
     clinicalNotes: "Test record",
@@ -146,37 +161,46 @@ test("clinical completion creates one document and cannot be edited by other phy
     markCompleted: true,
   };
   assert.equal(
-    data.saveClinicalConsultation(result.appointmentId!, "usr-doc-2", notes),
+    await data.saveClinicalConsultation(
+      result.appointmentId!,
+      "usr-doc-2",
+      notes,
+    ),
     false,
   );
   assert.equal(
-    db
-      .transaction(() =>
-        data.saveClinicalConsultation(
-          result.appointmentId!,
-          "usr-doc-1",
-          notes,
-        ),
+    await db
+      .transaction(
+        async () =>
+          await data.saveClinicalConsultation(
+            result.appointmentId!,
+            "usr-doc-1",
+            notes,
+          ),
       )
       .immediate(),
     true,
   );
   assert.equal(
-    data.saveClinicalConsultation(result.appointmentId!, "usr-doc-1", notes),
+    await data.saveClinicalConsultation(
+      result.appointmentId!,
+      "usr-doc-1",
+      notes,
+    ),
     false,
   );
   assert.equal(
     (
-      db
+      (await db
         .prepare(
           "SELECT count(*) AS n FROM patient_documents WHERE appointment_id=?",
         )
-        .get(result.appointmentId) as { n: number }
+        .get(result.appointmentId)) as { n: number }
     ).n,
     1,
   );
 });
 test.after(() => {
-  db.close();
+  getLocalDb().close();
   rmSync(folder, { recursive: true, force: true });
 });

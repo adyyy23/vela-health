@@ -11,9 +11,9 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const d = getDoctorById(id);
+  const d = await getDoctorById(id);
   if (!d?.isActive) notFound();
-  const clinic = d.clinicId ? getClinicById(d.clinicId) : null;
+  const clinic = d.clinicId ? await getClinicById(d.clinicId) : null;
   return (
     <>
       <PublicNavbar />
@@ -29,7 +29,11 @@ export default async function Page({
         <div className="grid lg:grid-cols-[1fr_360px] gap-12">
           <div>
             <div className="grid sm:grid-cols-[220px_1fr] gap-8 mb-12">
-              <ProviderPortrait src={d.user?.avatarUrl} name={`Dr. ${d.user?.firstName} ${d.user?.lastName}`} className="w-full max-w-[220px] h-72 object-cover object-top rounded-card"/>
+              <ProviderPortrait
+                src={d.user?.avatarUrl}
+                name={`Dr. ${d.user?.firstName} ${d.user?.lastName}`}
+                className="w-full max-w-[220px] h-72 object-cover object-top rounded-card"
+              />
               <section>
                 <h2 className="text-2xl font-semibold mb-5">
                   About your physician

@@ -23,17 +23,19 @@ export async function createSession(userId: string): Promise<string> {
     Date.now() + SESSION_MAX_AGE_DAYS * 86400000,
   ).toISOString();
 
-  db.prepare(
-    `
+  await db
+    .prepare(
+      `
     INSERT INTO sessions (id, user_id, token, expires_at)
     VALUES (?, ?, ?, ?)
   `,
-  ).run(
-    `sess-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-    userId,
-    token,
-    expiresAt,
-  );
+    )
+    .run(
+      `sess-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      userId,
+      token,
+      expiresAt,
+    );
 
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE_NAME, token, {
@@ -52,7 +54,7 @@ export async function destroySession(): Promise<void> {
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (token) {
     const db = getDb();
-    db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+    await db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
     cookieStore.delete(SESSION_COOKIE_NAME);
   }
 }
@@ -64,7 +66,7 @@ export async function getSessionUser(): Promise<User | null> {
     if (!token) return null;
 
     const db = getDb();
-    const row = db
+    const row = (await db
       .prepare(
         `
       SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.phone, u.avatar_url, u.created_at, s.expires_at
@@ -73,7 +75,7 @@ export async function getSessionUser(): Promise<User | null> {
       WHERE s.token = ?
     `,
       )
-      .get(token) as
+      .get(token)) as
       | {
           id: string;
           email: string;
@@ -90,7 +92,7 @@ export async function getSessionUser(): Promise<User | null> {
     if (!row) return null;
 
     if (new Date(row.expires_at) < new Date()) {
-      db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+      await db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
       return null;
     }
 

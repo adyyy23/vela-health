@@ -11,7 +11,7 @@ export default async function Clinics() {
         title="Your clinics, connected."
         description="Keep facility names, contact numbers, and published opening hours up to date."
       />
-      <NetworkDirectory clinics={getAllClinics()} />
+      <NetworkDirectory clinics={await getAllClinics()} />
     </>
   );
 }

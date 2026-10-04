@@ -19,24 +19,27 @@ export async function GET(request: Request) {
 
     if (conversationId) {
       if (
-        !getDb()
+        !(await getDb()
           .prepare(
             "SELECT id FROM conversations WHERE id=? AND (patient_id=? OR doctor_id=?)",
           )
-          .get(conversationId, user.id, user.id)
+          .get(conversationId, user.id, user.id))
       )
         return NextResponse.json(
           { error: "Conversation not found" },
           { status: 404 },
         );
-      const messages = getMessagesForConversation(conversationId, user.id);
+      const messages = await getMessagesForConversation(
+        conversationId,
+        user.id,
+      );
       return NextResponse.json(
         { messages },
         { headers: { "Cache-Control": "private, no-store" } },
       );
     }
 
-    const conversations = getConversationsForUser(user.id);
+    const conversations = await getConversationsForUser(user.id);
     return NextResponse.json(
       { conversations },
       { headers: { "Cache-Control": "private, no-store" } },
@@ -68,7 +71,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const msg = sendInAppMessage({
+    const msg = await sendInAppMessage({
       conversationId,
       senderId: user.id,
       content: content.trim(),

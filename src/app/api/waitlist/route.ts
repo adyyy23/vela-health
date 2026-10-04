@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const waitlist = getWaitlistForPatient(user.id);
+    const waitlist = await getWaitlistForPatient(user.id);
     return NextResponse.json({ waitlist });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     if (
       typeof doctorId !== "string" ||
-      !getDoctorById(doctorId)?.isActive ||
+      !(await getDoctorById(doctorId))?.isActive ||
       !validDate(preferredStartDate) ||
       !validDate(preferredEndDate) ||
       preferredStartDate < clinicDate() ||
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = joinWaitlist({
+    const result = await joinWaitlist({
       patientId: user.id,
       doctorId,
       preferredStartDate,

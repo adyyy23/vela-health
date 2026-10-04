@@ -6,7 +6,7 @@ export async function GET() {
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return NextResponse.json(
-    { notifications: getNotificationsForUser(user.id) },
+    { notifications: await getNotificationsForUser(user.id) },
     { headers: { "Cache-Control": "private, no-store" } },
   );
 }
@@ -20,6 +20,6 @@ export async function PATCH(request: Request) {
       { error: "Notification ID is required." },
       { status: 400 },
     );
-  markNotificationRead(body.id, user.id);
+  await markNotificationRead(body.id, user.id);
   return NextResponse.json({ success: true });
 }

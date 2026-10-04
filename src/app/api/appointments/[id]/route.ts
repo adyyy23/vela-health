@@ -11,7 +11,7 @@ export async function GET(
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const appointment = getAppointmentById(id);
+  const appointment = await getAppointmentById(id);
   if (!appointment || !canAccessAppointment(user, appointment))
     return NextResponse.json(
       { error: "Appointment not found" },
@@ -34,13 +34,15 @@ export async function PATCH(
   if (!body || typeof body !== "object")
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   const { status, note } = body;
-  const result = getDb()
-    .transaction(() => {
-      const a = getAppointmentById(id);
+  const result = await getDb()
+    .transaction(async () => {
+      const a = await getAppointmentById(id);
       if (!a || !canAccessAppointment(user, a)) return 404;
       if (typeof note !== "undefined" && typeof note !== "string") return 400;
       if (!canChangeStatus(user, a, status)) return 403;
-      return updateAppointmentStatus(a.id, status, user.id, note) ? 200 : 400;
+      return (await updateAppointmentStatus(a.id, status, user.id, note))
+        ? 200
+        : 400;
     })
     .immediate();
   return NextResponse.json(

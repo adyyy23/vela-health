@@ -11,9 +11,9 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const c = getClinicById(id);
+  const c = await getClinicById(id);
   if (!c) notFound();
-  const doctors = getDoctors({ clinicId: c.id });
+  const doctors = await getDoctors({ clinicId: c.id });
   return (
     <>
       <PublicNavbar />
@@ -61,7 +61,11 @@ export default async function Page({
             {doctors.length ? (
               doctors.map((d) => (
                 <article className="provider-row" key={d.userId}>
-                  <ProviderPortrait src={d.user?.avatarUrl} name={`Dr. ${d.user?.firstName} ${d.user?.lastName}`} className=""/>
+                  <ProviderPortrait
+                    src={d.user?.avatarUrl}
+                    name={`Dr. ${d.user?.firstName} ${d.user?.lastName}`}
+                    className=""
+                  />
                   <div>
                     <p className="eyebrow">{d.specialtyName}</p>
                     <h3 className="text-xl mt-3">

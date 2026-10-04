@@ -4,7 +4,7 @@ import { PageHeading } from "@/components/CareUI";
 import PatientDirectory from "@/components/PatientDirectory";
 export default async function Patients() {
   await requireRole(["ADMIN"]);
-  const patients = getDb()
+  const patients = await getDb()
     .prepare(
       `SELECT u.id,u.first_name || ' ' || u.last_name AS name,u.email,u.phone,COUNT(a.id) AS visits FROM users u LEFT JOIN appointments a ON a.patient_id=u.id WHERE u.role='PATIENT' GROUP BY u.id ORDER BY name`,
     )

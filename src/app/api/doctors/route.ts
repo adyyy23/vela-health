@@ -9,13 +9,16 @@ export async function GET(request: Request) {
     const consultationType = searchParams.get("consultationType") as any;
     const search = searchParams.get("search") || undefined;
 
-    const doctors = getDoctors({
+    const doctors = await getDoctors({
       specialtyId,
       clinicId,
       consultationType,
       search,
     });
-    return NextResponse.json({ doctors, specialties: getAllSpecialties() });
+    return NextResponse.json({
+      doctors,
+      specialties: await getAllSpecialties(),
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { getDb } from "@/lib/db";
 import { submitReview } from "@/lib/data";
 
 export async function POST(
@@ -32,13 +33,17 @@ export async function POST(
       );
     }
 
-    const result = submitReview({
-      appointmentId: id,
-      patientId: user.id,
-      doctorRating: Number(doctorRating),
-      clinicRating: Number(clinicRating),
-      comment,
-    });
+    const result = await getDb()
+      .transaction(() =>
+        submitReview({
+          appointmentId: id,
+          patientId: user.id,
+          doctorRating: Number(doctorRating),
+          clinicRating: Number(clinicRating),
+          comment,
+        }),
+      )
+      .immediate();
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -46,6 +51,9 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Review could not be saved. Please try again." },
+      { status: 500 },
+    );
   }
 }

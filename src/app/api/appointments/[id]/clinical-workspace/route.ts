@@ -39,14 +39,15 @@ export async function POST(
       );
     }
 
-    const ok = getDb()
-      .transaction(() =>
-        saveClinicalConsultation(id, user.id, {
-          clinicalNotes,
-          prescription,
-          followUpInstructions,
-          markCompleted: Boolean(markCompleted),
-        }),
+    const ok = await getDb()
+      .transaction(
+        async () =>
+          await saveClinicalConsultation(id, user.id, {
+            clinicalNotes,
+            prescription,
+            followUpInstructions,
+            markCompleted: Boolean(markCompleted),
+          }),
       )
       .immediate();
 
@@ -57,7 +58,7 @@ export async function POST(
       );
     }
 
-    recordActivity(
+    await recordActivity(
       user,
       markCompleted ? "VISIT_COMPLETED" : "CLINICAL_DRAFT_SAVED",
       `APPOINTMENT:${id}`,

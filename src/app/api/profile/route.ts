@@ -12,8 +12,8 @@ export async function GET() {
       user,
       profile:
         user.role === "DOCTOR"
-          ? getDoctorById(user.id)
-          : getDb()
+          ? await getDoctorById(user.id)
+          : await getDb()
               .prepare("SELECT * FROM patient_profiles WHERE user_id=?")
               .get(user.id),
     },
@@ -40,9 +40,11 @@ export async function PATCH(request: Request) {
           { error: "Enter a biography and a fee from 0 to 10,000." },
           { status: 400 },
         );
-      db.prepare(
-        "UPDATE doctor_profiles SET bio=?,consultation_fee=? WHERE user_id=?",
-      ).run(b.bio.trim(), Number(b.consultationFee), user.id);
+      await db
+        .prepare(
+          "UPDATE doctor_profiles SET bio=?,consultation_fee=? WHERE user_id=?",
+        )
+        .run(b.bio.trim(), Number(b.consultationFee), user.id);
     } else if (user.role === "PATIENT") {
       if (
         ![
@@ -60,25 +62,31 @@ export async function PATCH(request: Request) {
           { error: "Complete your name and valid contact details." },
           { status: 400 },
         );
-      db.transaction(() => {
-        db.prepare(
-          "UPDATE users SET first_name=?,last_name=?,phone=? WHERE id=?",
-        ).run(b.firstName.trim(), b.lastName.trim(), b.phone, user.id);
-        db.prepare(
-          "UPDATE patient_profiles SET emergency_contact_name=?,emergency_contact_phone=?,address=? WHERE user_id=?",
-        ).run(
-          b.emergency_contact_name,
-          b.emergency_contact_phone,
-          b.address,
-          user.id,
-        );
-      }).immediate();
+      await db
+        .transaction(async () => {
+          await db
+            .prepare(
+              "UPDATE users SET first_name=?,last_name=?,phone=? WHERE id=?",
+            )
+            .run(b.firstName.trim(), b.lastName.trim(), b.phone, user.id);
+          await db
+            .prepare(
+              "UPDATE patient_profiles SET emergency_contact_name=?,emergency_contact_phone=?,address=? WHERE user_id=?",
+            )
+            .run(
+              b.emergency_contact_name,
+              b.emergency_contact_phone,
+              b.address,
+              user.id,
+            );
+        })
+        .immediate();
     } else
       return NextResponse.json(
         { error: "Profile editing is not available for this role." },
         { status: 403 },
       );
-    recordActivity(user, "PROFILE_UPDATED", `USER:${user.id}`);
+    await recordActivity(user, "PROFILE_UPDATED", `USER:${user.id}`);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(

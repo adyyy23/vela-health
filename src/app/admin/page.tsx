@@ -9,11 +9,11 @@ import { clinicDate } from "@/lib/care-time";
 import { PageHeading, AppointmentRows, EmptyState } from "@/components/CareUI";
 export default async function AdminHome() {
   const user = await requireRole(["ADMIN"]);
-  const metrics = getAdminOverviewMetrics();
-  const appointments = getAppointmentsForUser(user.id, user.role).filter(
-    (a) => a.scheduledDate === clinicDate(),
-  );
-  const clinics = getAllClinics();
+  const metrics = await getAdminOverviewMetrics();
+  const appointments = (
+    await getAppointmentsForUser(user.id, user.role)
+  ).filter((a) => a.scheduledDate === clinicDate());
+  const clinics = await getAllClinics();
   return (
     <>
       <PageHeading

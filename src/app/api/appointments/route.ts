@@ -12,7 +12,7 @@ export async function GET() {
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return NextResponse.json(
-    { appointments: getAppointmentsForUser(user.id, user.role) },
+    { appointments: await getAppointmentsForUser(user.id, user.role) },
     { headers: { "Cache-Control": "private, no-store" } },
   );
 }
@@ -46,10 +46,10 @@ export async function POST(request: Request) {
         { error: "Complete all required booking fields." },
         { status: 400 },
       );
-    const result = getDb()
-      .transaction(() => {
+    const result = await getDb()
+      .transaction(async () => {
         const previous = body.rescheduleId
-          ? getAppointmentById(body.rescheduleId)
+          ? await getAppointmentById(body.rescheduleId)
           : null;
         if (
           body.rescheduleId &&
@@ -63,9 +63,12 @@ export async function POST(request: Request) {
             success: false,
             error: "This appointment cannot be rescheduled.",
           };
-        const created = createAppointment({ ...body, patientId: user.id });
+        const created = await createAppointment({
+          ...body,
+          patientId: user.id,
+        });
         if (created.success && previous)
-          updateAppointmentStatus(
+          await updateAppointmentStatus(
             previous.id,
             "CANCELLED",
             user.id,
@@ -78,7 +81,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ...result,
-        referenceNo: getAppointmentById(result.appointmentId!)?.referenceNo,
+        referenceNo: (await getAppointmentById(result.appointmentId!))
+          ?.referenceNo,
       },
       { status: 201 },
     );

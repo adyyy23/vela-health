@@ -36,9 +36,11 @@ CI runs lint, types, database tests and production compilation with a temporary 
 
 ## Data and deployment
 
-All features now use one consistent SQLite data layer. Configure `VELA_DATABASE_PATH` to a durable writable file on a persistent Node server, with backups and appropriate access controls. On Vercel, a local function filesystem or `/tmp` is **not a persistent shared database**. The existing partial Supabase fallback was removed because authentication and clinical writes continued using SQLite and could disagree with public directory reads.
+The asynchronous data layer uses Supabase PostgreSQL when `POSTGRES_URL` is configured, and SQLite locally otherwise. Authentication, directories, clinical records, messages and administration all use the same selected backend. The cloud connection validates Supabase's CA certificate and server hostname. Private records are accessed through authenticated server routes; the schema enables row-level security and revokes anonymous/authenticated Data API table access. Transactional writes use a PostgreSQL advisory lock for serialized appointment changes.
 
-**The current implementation is not ready for Vercel serverless persistence.** Deploying the clinical workflows there requires an asynchronous shared database adapter and a full schema/data migration. An environment variable pointing at `/tmp` does not solve this. The runtime explicitly reports missing persistent configuration instead of silently losing records. `supabase/schema.sql` is retained as a legacy reference, not an active backend.
+The Vercel integration provides the server-only `POSTGRES_URL`. Apply `supabase/schema.sql` using `npm run db:setup` with the environment loaded. Optional `--seed-demo` explicitly creates only bundled fictional examples and requires an empty database; it never overwrites existing accounts. Do not upload real patient records without authorization. No schema initialization or demo seeding occurs during ordinary application requests.
+
+For local development, `VELA_DATABASE_PATH` selects a SQLite file. Vercel requires the PostgreSQL configuration and never falls back to temporary local storage. Keep database credentials out of Git and browser code.
 
 ## Supported workflows and limits
 

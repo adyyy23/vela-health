@@ -3,9 +3,9 @@ import PublicNavbar from "@/components/PublicNavbar";
 import { PageHeading } from "@/components/CareUI";
 import { getAllSpecialties, getDoctors } from "@/lib/data";
 export const dynamic = "force-dynamic";
-export default function Page() {
-  const specialties = getAllSpecialties();
-  const doctors = getDoctors({});
+export default async function Page() {
+  const specialties = await getAllSpecialties();
+  const doctors = await getDoctors({});
   return (
     <>
       <PublicNavbar />

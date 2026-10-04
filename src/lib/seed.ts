@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { getDb } from "./db";
+import { getLocalDb as getDb } from "./db";
 
 export async function seedDatabase() {
   const db = getDb();

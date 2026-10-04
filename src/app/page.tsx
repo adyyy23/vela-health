@@ -6,10 +6,10 @@ import CareSearch from "@/components/CareSearch";
 import VelaLogo from "@/components/VelaLogo";
 import { getDoctors, getAllClinics, getAllSpecialties } from "@/lib/data";
 export const dynamic = "force-dynamic";
-export default function HomePage() {
-  const doctors = getDoctors();
-  const clinics = getAllClinics();
-  const specialties = getAllSpecialties();
+export default async function HomePage() {
+  const doctors = await getDoctors();
+  const clinics = await getAllClinics();
+  const specialties = await getAllSpecialties();
   return (
     <div className="public-experience">
       <PublicNavbar />
@@ -114,7 +114,11 @@ export default function HomePage() {
               {doctors.slice(0, 3).map((d) => (
                 <article key={d.userId}>
                   <Link href={`/doctors/${d.userId}`}>
-                    <ProviderPortrait src={d.user?.avatarUrl} name={`Dr. ${d.user?.firstName} ${d.user?.lastName}`} className=""/>
+                    <ProviderPortrait
+                      src={d.user?.avatarUrl}
+                      name={`Dr. ${d.user?.firstName} ${d.user?.lastName}`}
+                      className=""
+                    />
                   </Link>
                   <p className="eyebrow mt-6">{d.specialtyName}</p>
                   <h3>

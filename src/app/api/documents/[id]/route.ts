@@ -14,11 +14,11 @@ export async function GET(
       { status: 403 },
     );
   const { id } = await params;
-  const doc = getDb()
+  const doc = (await getDb()
     .prepare(
       "SELECT title,file_path_or_summary FROM patient_documents WHERE id=? AND patient_id=?",
     )
-    .get(id, user.id) as
+    .get(id, user.id)) as
     | { title: string; file_path_or_summary: string }
     | undefined;
   if (!doc)

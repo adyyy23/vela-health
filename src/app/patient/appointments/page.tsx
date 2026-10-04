@@ -4,10 +4,11 @@ import { getAppointmentsForUser } from "@/lib/data";
 import { PageHeading, AppointmentRows, EmptyState } from "@/components/CareUI";
 export default async function Page() {
   const user = await requireRole(["PATIENT"]);
-  const appointments = getAppointmentsForUser(user.id, user.role).sort((a, b) =>
-    (b.scheduledDate + b.scheduledTime).localeCompare(
-      a.scheduledDate + a.scheduledTime,
-    ),
+  const appointments = (await getAppointmentsForUser(user.id, user.role)).sort(
+    (a, b) =>
+      (b.scheduledDate + b.scheduledTime).localeCompare(
+        a.scheduledDate + a.scheduledTime,
+      ),
   );
   return (
     <>

@@ -5,7 +5,7 @@ import { clinicDate, visitLabel } from "@/lib/care-time";
 import { PageHeading, EmptyState, AppointmentRows } from "@/components/CareUI";
 export default async function PatientHome() {
   const user = await requireRole(["PATIENT"]);
-  const appointments = getAppointmentsForUser(user.id, user.role);
+  const appointments = await getAppointmentsForUser(user.id, user.role);
   const upcoming = appointments
     .filter(
       (a) =>
@@ -20,7 +20,7 @@ export default async function PatientHome() {
       ),
     );
   const next = upcoming[0];
-  const documents = getPatientDocuments(user.id);
+  const documents = await getPatientDocuments(user.id);
   return (
     <>
       <PageHeading

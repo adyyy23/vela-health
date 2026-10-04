@@ -5,7 +5,7 @@ import { clinicDate, visitLabel } from "@/lib/care-time";
 import { PageHeading, EmptyState, AppointmentRows } from "@/components/CareUI";
 export default async function DoctorToday() {
   const user = await requireRole(["DOCTOR"]);
-  const all = getAppointmentsForUser(user.id, user.role);
+  const all = await getAppointmentsForUser(user.id, user.role);
   const today = all.filter((a) => a.scheduledDate === clinicDate());
   const active = today.filter(
     (a) => !["COMPLETED", "CANCELLED", "NO_SHOW"].includes(a.status),

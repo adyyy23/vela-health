@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       );
     }
     const db = getDb();
-    const existing = db
+    const existing = await db
       .prepare("SELECT id FROM users WHERE email = ?")
       .get(email.trim().toLowerCase());
     if (existing) {
@@ -52,29 +52,35 @@ export async function POST(request: Request) {
     const passwordHash = hashPassword(password);
     const now = new Date().toISOString();
 
-    db.transaction(() => {
-      db.prepare(
-        `
+    await db
+      .transaction(async () => {
+        await db
+          .prepare(
+            `
       INSERT INTO users (id, email, password_hash, role, first_name, last_name, phone, avatar_url, created_at)
       VALUES (?, ?, ?, 'PATIENT', ?, ?, ?, ?, ?)
     `,
-      ).run(
-        userId,
-        email.trim().toLowerCase(),
-        passwordHash,
-        firstName.trim(),
-        lastName.trim(),
-        phone || null,
-        null,
-        now,
-      );
+          )
+          .run(
+            userId,
+            email.trim().toLowerCase(),
+            passwordHash,
+            firstName.trim(),
+            lastName.trim(),
+            phone || null,
+            null,
+            now,
+          );
 
-      db.prepare(
-        `
+        await db
+          .prepare(
+            `
       INSERT INTO patient_profiles (user_id) VALUES (?)
     `,
-      ).run(userId);
-    }).immediate();
+          )
+          .run(userId);
+      })
+      .immediate();
 
     await createSession(userId);
 

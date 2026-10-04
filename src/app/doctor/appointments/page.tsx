@@ -3,7 +3,7 @@ import { getAppointmentsForUser } from "@/lib/data";
 import { PageHeading, AppointmentRows, EmptyState } from "@/components/CareUI";
 export default async function Page() {
   const user = await requireRole(["DOCTOR"]);
-  const appointments = getAppointmentsForUser(user.id, user.role);
+  const appointments = await getAppointmentsForUser(user.id, user.role);
   return (
     <>
       <PageHeading

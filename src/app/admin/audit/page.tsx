@@ -3,7 +3,7 @@ import { getAuditLogs } from "@/lib/data";
 import { PageHeading, EmptyState } from "@/components/CareUI";
 export default async function Activity() {
   await requireRole(["ADMIN"]);
-  const logs = getAuditLogs();
+  const logs = await getAuditLogs();
   return (
     <>
       <PageHeading

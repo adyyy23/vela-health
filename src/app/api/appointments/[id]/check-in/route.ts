@@ -14,8 +14,8 @@ export async function POST(
     }
 
     const { id } = await params;
-    const ok = getDb()
-      .transaction(() => performDigitalCheckIn(id, user.id))
+    const ok = await getDb()
+      .transaction(async () => await performDigitalCheckIn(id, user.id))
       .immediate();
 
     if (!ok) {

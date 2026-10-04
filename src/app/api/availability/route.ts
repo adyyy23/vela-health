@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       );
     return NextResponse.json(
       {
-        blocks: getDb()
+        blocks: await getDb()
           .prepare(
             "SELECT * FROM doctor_availabilities WHERE doctor_id=? ORDER BY day_of_week,start_time,is_telehealth",
           )
@@ -36,7 +36,13 @@ export async function GET(request: Request) {
       { status: 400 },
     );
   return NextResponse.json(
-    { slots: getAvailableSlots(id, date, type as "IN_PERSON" | "TELEHEALTH") },
+    {
+      slots: await getAvailableSlots(
+        id,
+        date,
+        type as "IN_PERSON" | "TELEHEALTH",
+      ),
+    },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
@@ -118,30 +124,36 @@ export async function PUT(request: Request) {
         );
     }
   const db = getDb();
-  db.transaction(() => {
-    db.prepare("DELETE FROM doctor_availabilities WHERE doctor_id=?").run(
-      user.id,
-    );
-    for (const b of blocks)
-      db.prepare(
-        "INSERT INTO doctor_availabilities(id,doctor_id,day_of_week,start_time,end_time,slot_duration_minutes,is_telehealth) VALUES(?,?,?,?,?,?,?)",
-      ).run(
-        randomUUID(),
-        user.id,
-        b.day_of_week,
-        b.start_time,
-        b.end_time,
-        b.slot_duration_minutes,
-        b.is_telehealth,
-      );
-    db.prepare(
-      "UPDATE doctor_profiles SET in_person_available=?,telehealth_available=? WHERE user_id=?",
-    ).run(
-      body.inPersonEnabled ? 1 : 0,
-      body.telehealthEnabled ? 1 : 0,
-      user.id,
-    );
-    recordActivity(user, "AVAILABILITY_UPDATED", `DOCTOR:${user.id}`);
-  }).immediate();
+  await db
+    .transaction(async () => {
+      await db
+        .prepare("DELETE FROM doctor_availabilities WHERE doctor_id=?")
+        .run(user.id);
+      for (const b of blocks)
+        await db
+          .prepare(
+            "INSERT INTO doctor_availabilities(id,doctor_id,day_of_week,start_time,end_time,slot_duration_minutes,is_telehealth) VALUES(?,?,?,?,?,?,?)",
+          )
+          .run(
+            randomUUID(),
+            user.id,
+            b.day_of_week,
+            b.start_time,
+            b.end_time,
+            b.slot_duration_minutes,
+            b.is_telehealth,
+          );
+      await db
+        .prepare(
+          "UPDATE doctor_profiles SET in_person_available=?,telehealth_available=? WHERE user_id=?",
+        )
+        .run(
+          body.inPersonEnabled ? 1 : 0,
+          body.telehealthEnabled ? 1 : 0,
+          user.id,
+        );
+      await recordActivity(user, "AVAILABILITY_UPDATED", `DOCTOR:${user.id}`);
+    })
+    .immediate();
   return NextResponse.json({ success: true });
 }

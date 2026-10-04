@@ -21,9 +21,9 @@ export async function POST(request: Request) {
     }
 
     const db = getDb();
-    const user = db
+    const user = (await db
       .prepare("SELECT * FROM users WHERE email = ?")
-      .get(email.trim().toLowerCase()) as any;
+      .get(email.trim().toLowerCase())) as any;
 
     if (!user) {
       return NextResponse.json(

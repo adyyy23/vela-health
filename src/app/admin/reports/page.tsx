@@ -7,9 +7,9 @@ import {
 import { PageHeading, EmptyState } from "@/components/CareUI";
 export default async function Reports() {
   const user = await requireRole(["ADMIN"]);
-  const m = getAdminOverviewMetrics();
-  const all = getAppointmentsForUser(user.id, user.role);
-  const clinics = getAllClinics();
+  const m = await getAdminOverviewMetrics();
+  const all = await getAppointmentsForUser(user.id, user.role);
+  const clinics = await getAllClinics();
   return (
     <>
       <PageHeading

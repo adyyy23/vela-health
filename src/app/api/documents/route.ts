@@ -11,7 +11,7 @@ export async function GET() {
       { status: 403 },
     );
   return NextResponse.json(
-    { documents: getPatientDocuments(user.id) },
+    { documents: await getPatientDocuments(user.id) },
     { headers: { "Cache-Control": "private, no-store" } },
   );
 }

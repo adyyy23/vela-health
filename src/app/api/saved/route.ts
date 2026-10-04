@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const saved = getSavedItemsForPatient(user.id);
+    const saved = await getSavedItemsForPatient(user.id);
     return NextResponse.json({ saved });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -32,7 +32,9 @@ export async function POST(request: Request) {
     if (
       typeof itemId !== "string" ||
       !["DOCTOR", "CLINIC"].includes(itemType) ||
-      (itemType === "DOCTOR" ? !getDoctorById(itemId) : !getClinicById(itemId))
+      (itemType === "DOCTOR"
+        ? !(await getDoctorById(itemId))
+        : !(await getClinicById(itemId)))
     ) {
       return NextResponse.json(
         { error: "itemType and itemId are required." },
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const isSaved = toggleSavedItem(user.id, itemType, itemId);
+    const isSaved = await toggleSavedItem(user.id, itemType, itemId);
     return NextResponse.json({ success: true, isSaved });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
