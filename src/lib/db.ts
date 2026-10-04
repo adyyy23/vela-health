@@ -1,20 +1,25 @@
+import { SUPABASE_CA } from "./cloud-tls";
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
 let dbInstance: Database.Database | null = null;
 
-export function getDb(): Database.Database {
+export function getLocalDb(): Database.Database {
   if (dbInstance) {
     return dbInstance;
   }
 
-  const dataDir = path.join(process.cwd(), "data");
+  if (process.env.VERCEL && !process.env.VELA_DATABASE_PATH)
+    throw new Error("Persistent database configuration required.");
+  const dbPath =
+    process.env.VELA_DATABASE_PATH ||
+    path.join(process.cwd(), "data", "vela.db");
+  const dataDir = path.dirname(dbPath);
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 
-  const dbPath = path.join(dataDir, "vela.db");
   const db = new Database(dbPath);
 
   // Enable WAL mode for better concurrency and performance
@@ -26,7 +31,7 @@ export function getDb(): Database.Database {
   return db;
 }
 
-function initializeSchema(db: Database.Database) {
+export function initializeSchema(db: Database.Database) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -238,4 +243,100 @@ function initializeSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_messages_conv ON messages(conversation_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read);
   `);
+}
+
+import { AsyncLocalStorage } from "node:async_hooks";
+import { Pool, PoolClient, types } from "pg";
+types.setTypeParser(20, Number);
+types.setTypeParser(1700, Number);
+const transactionContext = new AsyncLocalStorage<PoolClient>();
+let pool: Pool | null = null;
+let localWriteQueue: Promise<void> = Promise.resolve();
+export function cloudConfigured() {
+  return !!process.env.POSTGRES_URL;
+}
+function cloudPool() {
+  if (!pool) {
+    const url = new URL(process.env.POSTGRES_URL!);
+    url.searchParams.delete("sslmode");
+    pool = new Pool({
+      connectionString: url.toString(),
+      ssl: { ca: SUPABASE_CA, rejectUnauthorized: true },
+      max: 3,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 10000,
+    });
+  }
+  return pool;
+}
+async function query(sql: string, values: unknown[]) {
+  if (!cloudConfigured()) {
+    const statement = getLocalDb().prepare(sql);
+    return {
+      rows: statement.reader ? statement.all(...values) : [],
+      rowCount: statement.reader ? 0 : statement.run(...values).changes,
+    };
+  }
+  let index = 0;
+  const text = sql.replace(/\?/g, () => `$${++index}`);
+  return (transactionContext.getStore() || cloudPool()).query(text, values);
+}
+export function getDb() {
+  return {
+    prepare(sql: string) {
+      return {
+        async all(...values: unknown[]): Promise<any[]> {
+          return (await query(sql, values)).rows;
+        },
+        async get(...values: unknown[]): Promise<any> {
+          return (await query(sql, values)).rows[0];
+        },
+        async run(...values: unknown[]) {
+          const result = await query(sql, values);
+          return { changes: result.rowCount || 0 };
+        },
+      };
+    },
+    transaction<T>(work: () => T | Promise<T>) {
+      return {
+        async immediate(): Promise<T> {
+          if (!cloudConfigured()) {
+            const previous = localWriteQueue;
+            let release!: () => void;
+            localWriteQueue = new Promise<void>((resolve) => {
+              release = resolve;
+            });
+            await previous;
+            const db = getLocalDb();
+            db.exec("BEGIN IMMEDIATE");
+            try {
+              const result = await work();
+              db.exec("COMMIT");
+              return result;
+            } catch (error) {
+              db.exec("ROLLBACK");
+              throw error;
+            } finally {
+              release();
+            }
+          }
+          const existing = transactionContext.getStore();
+          if (existing) return work();
+          const client = await cloudPool().connect();
+          try {
+            await client.query("BEGIN");
+            await client.query("SELECT pg_advisory_xact_lock(736421)");
+            const result = await transactionContext.run(client, work);
+            await client.query("COMMIT");
+            return result;
+          } catch (error) {
+            await client.query("ROLLBACK");
+            throw error;
+          } finally {
+            client.release();
+          }
+        },
+      };
+    },
+  };
 }

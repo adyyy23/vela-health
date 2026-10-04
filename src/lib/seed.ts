@@ -1,10 +1,12 @@
 import bcrypt from "bcryptjs";
-import { getDb } from "./db";
+import { getLocalDb as getDb } from "./db";
 
 export async function seedDatabase() {
   const db = getDb();
 
-  const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
+  const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as {
+    count: number;
+  };
   if (userCount.count > 0) {
     // Already seeded
     return;
@@ -18,9 +20,15 @@ export async function seedDatabase() {
 
   const now = new Date().toISOString();
   const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-  const lastWeekStr = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+  const tomorrowStr = new Date(Date.now() + 86400000)
+    .toISOString()
+    .split("T")[0];
+  const yesterdayStr = new Date(Date.now() - 86400000)
+    .toISOString()
+    .split("T")[0];
+  const lastWeekStr = new Date(Date.now() - 7 * 86400000)
+    .toISOString()
+    .split("T")[0];
 
   // 1. Specialties
   const insertSpecialty = db.prepare(`
@@ -29,14 +37,62 @@ export async function seedDatabase() {
   `);
 
   const specialties = [
-    { id: "spec-derma", name: "Dermatology", slug: "dermatology", desc: "Advanced medical and cosmetic skin, hair, and nail treatments.", icon: "Sparkles" },
-    { id: "spec-cardio", name: "Cardiology", slug: "cardiology", desc: "Heart disease prevention, lipid diagnostics, and hypertension care.", icon: "HeartPulse" },
-    { id: "spec-general", name: "Family & General Medicine", slug: "general-medicine", desc: "Comprehensive primary care, chronic illness, and annual physicals.", icon: "Stethoscope" },
-    { id: "spec-pedia", name: "Pediatrics & Child Health", slug: "pediatrics", desc: "Developmental screening, childhood wellness, and vaccinations.", icon: "Baby" },
-    { id: "spec-women", name: "Women's Health & OB-GYN", slug: "womens-health", desc: "Reproductive care, prenatal counseling, and preventative screening.", icon: "ShieldAlert" },
-    { id: "spec-mental", name: "Mental & Behavioral Wellness", slug: "mental-wellness", desc: "Cognitive therapy, anxiety treatment, and emotional wellness.", icon: "Smile" },
-    { id: "spec-dental", name: "Dental & Oral Care", slug: "dental", desc: "Preventive cleanings, periodontal health, and restorative care.", icon: "Activity" },
-    { id: "spec-eye", name: "Ophthalmology & Eye Care", slug: "eye-care", desc: "Vision diagnostics, corneal health, and laser evaluations.", icon: "Eye" },
+    {
+      id: "spec-derma",
+      name: "Dermatology",
+      slug: "dermatology",
+      desc: "Advanced medical and cosmetic skin, hair, and nail treatments.",
+      icon: "Sparkles",
+    },
+    {
+      id: "spec-cardio",
+      name: "Cardiology",
+      slug: "cardiology",
+      desc: "Heart disease prevention, lipid diagnostics, and hypertension care.",
+      icon: "HeartPulse",
+    },
+    {
+      id: "spec-general",
+      name: "Family & General Medicine",
+      slug: "general-medicine",
+      desc: "Comprehensive primary care, chronic illness, and annual physicals.",
+      icon: "Stethoscope",
+    },
+    {
+      id: "spec-pedia",
+      name: "Pediatrics & Child Health",
+      slug: "pediatrics",
+      desc: "Developmental screening, childhood wellness, and vaccinations.",
+      icon: "Baby",
+    },
+    {
+      id: "spec-women",
+      name: "Women's Health & OB-GYN",
+      slug: "womens-health",
+      desc: "Reproductive care, prenatal counseling, and preventative screening.",
+      icon: "ShieldAlert",
+    },
+    {
+      id: "spec-mental",
+      name: "Mental & Behavioral Wellness",
+      slug: "mental-wellness",
+      desc: "Cognitive therapy, anxiety treatment, and emotional wellness.",
+      icon: "Smile",
+    },
+    {
+      id: "spec-dental",
+      name: "Dental & Oral Care",
+      slug: "dental",
+      desc: "Preventive cleanings, periodontal health, and restorative care.",
+      icon: "Activity",
+    },
+    {
+      id: "spec-eye",
+      name: "Ophthalmology & Eye Care",
+      slug: "eye-care",
+      desc: "Vision diagnostics, corneal health, and laser evaluations.",
+      icon: "Eye",
+    },
   ];
 
   for (const s of specialties) {
@@ -63,9 +119,12 @@ export async function seedDatabase() {
       phone: "(415) 890-4100",
       email: "central@velahealth.com",
       hours: "Mon - Fri: 8:00 AM - 7:00 PM | Sat: 9:00 AM - 3:00 PM",
-      parking: "Underground parking validation available on Sutter St entrance.",
-      access: "ADA Compliant with dedicated elevator bank and barrier-free access.",
-      image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+      parking:
+        "Underground parking validation available on Sutter St entrance.",
+      access:
+        "ADA Compliant with dedicated elevator bank and barrier-free access.",
+      image:
+        "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
     },
     {
       id: "clinic-mission-bay",
@@ -82,7 +141,8 @@ export async function seedDatabase() {
       hours: "Mon - Fri: 7:30 AM - 6:30 PM | Sat: 8:30 AM - 2:00 PM",
       parking: "Direct garage parking next to UCSF Mission Bay campus.",
       access: "Wheelchair accessible, hearing loop installed at reception.",
-      image: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+      image:
+        "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
     },
     {
       id: "clinic-marina",
@@ -97,9 +157,11 @@ export async function seedDatabase() {
       phone: "(415) 890-4300",
       email: "marina@velahealth.com",
       hours: "Mon - Sat: 8:30 AM - 6:00 PM",
-      parking: "Street metered parking & Lombard St public garage within 2 blocks.",
+      parking:
+        "Street metered parking & Lombard St public garage within 2 blocks.",
       access: "Ground level zero-threshold entry with wide corridors.",
-      image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
+      image:
+        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
     },
     {
       id: "clinic-pac-heights",
@@ -116,7 +178,8 @@ export async function seedDatabase() {
       hours: "Mon - Fri: 9:00 AM - 5:30 PM",
       parking: "Valet parking available at Webster & Clay.",
       access: "Elevator accessible, certified service animal friendly.",
-      image: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80",
+      image:
+        "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80",
     },
   ];
 
@@ -136,7 +199,7 @@ export async function seedDatabase() {
       c.hours,
       c.parking,
       c.access,
-      c.image
+      c.image,
     );
   }
 
@@ -147,13 +210,62 @@ export async function seedDatabase() {
   `);
 
   const services = [
-    { id: "srv-d-1", spec: "spec-derma", name: "Comprehensive Skin Health Evaluation", desc: "Full-body dermoscopy, mole mapping, and skin cancer assessment.", dur: 45, fee: 180 },
-    { id: "srv-d-2", spec: "spec-derma", name: "Targeted Acne & Rosacea Consultation", desc: "Personalized medical regimen, barrier repair, and hormonal acne plan.", dur: 30, fee: 140 },
-    { id: "srv-c-1", spec: "spec-cardio", name: "Preventative Cardiac Risk Screening", desc: "Advanced lipid analysis review, 12-lead ECG review, blood pressure check.", dur: 45, fee: 220 },
-    { id: "srv-c-2", spec: "spec-cardio", name: "Hypertension & Heart Follow-Up", desc: "Medication adjustment, lifestyle monitoring, and telemetry check.", dur: 30, fee: 160 },
-    { id: "srv-g-1", spec: "spec-general", name: "Annual Health & Longevity Physical", desc: "Head-to-toe examination, metabolic lab order, and wellness blueprint.", dur: 45, fee: 150 },
-    { id: "srv-g-2", spec: "spec-general", name: "Acute Illness & Infection Visit", desc: "Rapid evaluation for respiratory, GI, or systemic symptoms.", dur: 20, fee: 110 },
-    { id: "srv-p-1", spec: "spec-pedia", name: "Pediatric Wellness Check & Growth Milestone", desc: "Child growth tracking, immunizations, and developmental review.", dur: 30, fee: 130 },
+    {
+      id: "srv-d-1",
+      spec: "spec-derma",
+      name: "Comprehensive Skin Health Evaluation",
+      desc: "Full-body dermoscopy, mole mapping, and skin cancer assessment.",
+      dur: 45,
+      fee: 180,
+    },
+    {
+      id: "srv-d-2",
+      spec: "spec-derma",
+      name: "Targeted Acne & Rosacea Consultation",
+      desc: "Personalized medical regimen, barrier repair, and hormonal acne plan.",
+      dur: 30,
+      fee: 140,
+    },
+    {
+      id: "srv-c-1",
+      spec: "spec-cardio",
+      name: "Preventative Cardiac Risk Screening",
+      desc: "Advanced lipid analysis review, 12-lead ECG review, blood pressure check.",
+      dur: 45,
+      fee: 220,
+    },
+    {
+      id: "srv-c-2",
+      spec: "spec-cardio",
+      name: "Hypertension & Heart Follow-Up",
+      desc: "Medication adjustment, lifestyle monitoring, and telemetry check.",
+      dur: 30,
+      fee: 160,
+    },
+    {
+      id: "srv-g-1",
+      spec: "spec-general",
+      name: "Annual Health & Longevity Physical",
+      desc: "Head-to-toe examination, metabolic lab order, and wellness blueprint.",
+      dur: 45,
+      fee: 150,
+    },
+    {
+      id: "srv-g-2",
+      spec: "spec-general",
+      name: "Acute Illness & Infection Visit",
+      desc: "Rapid evaluation for respiratory, GI, or systemic symptoms.",
+      dur: 20,
+      fee: 110,
+    },
+    {
+      id: "srv-p-1",
+      spec: "spec-pedia",
+      name: "Pediatric Wellness Check & Growth Milestone",
+      desc: "Child growth tracking, immunizations, and developmental review.",
+      dur: 30,
+      fee: 130,
+    },
   ];
 
   for (const s of services) {
@@ -186,7 +298,7 @@ export async function seedDatabase() {
     "Santos",
     "+1 (415) 555-0142",
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-    now
+    now,
   );
   insertPatientProfile.run(
     "usr-patient-1",
@@ -195,7 +307,7 @@ export async function seedDatabase() {
     "O+",
     "Carlos Santos (Spouse)",
     "+1 (415) 555-0199",
-    "742 Valencia St, Apt 4B, San Francisco, CA"
+    "742 Valencia St, Apt 4B, San Francisco, CA",
   );
 
   // Doctor 1: Dr. Elena Reyes (Dermatology)
@@ -208,7 +320,7 @@ export async function seedDatabase() {
     "Reyes",
     "+1 (415) 555-0188",
     "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
-    now
+    now,
   );
   insertDoctorProfile.run(
     "usr-doc-1",
@@ -224,7 +336,7 @@ export async function seedDatabase() {
     4.96,
     148,
     1,
-    1
+    1,
   );
 
   // Doctor 2: Dr. Marcus Chen (Cardiology)
@@ -237,7 +349,7 @@ export async function seedDatabase() {
     "Chen",
     "+1 (415) 555-0177",
     "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80",
-    now
+    now,
   );
   insertDoctorProfile.run(
     "usr-doc-2",
@@ -253,7 +365,7 @@ export async function seedDatabase() {
     4.98,
     182,
     1,
-    1
+    1,
   );
 
   // Doctor 3: Dr. Sofia Alvarez (Pediatrics)
@@ -266,7 +378,7 @@ export async function seedDatabase() {
     "Alvarez",
     "+1 (415) 555-0166",
     "https://images.unsplash.com/photo-1594824813511-1a89c9223c68?auto=format&fit=crop&w=400&q=80",
-    now
+    now,
   );
   insertDoctorProfile.run(
     "usr-doc-3",
@@ -282,7 +394,7 @@ export async function seedDatabase() {
     4.93,
     94,
     1,
-    1
+    1,
   );
 
   // Doctor 4: Dr. Aris Patel (Family Medicine)
@@ -295,7 +407,7 @@ export async function seedDatabase() {
     "Patel",
     "+1 (415) 555-0155",
     "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80",
-    now
+    now,
   );
   insertDoctorProfile.run(
     "usr-doc-4",
@@ -311,7 +423,7 @@ export async function seedDatabase() {
     4.91,
     115,
     1,
-    1
+    1,
   );
 
   // Admin User: Sarah Jenkins
@@ -324,7 +436,7 @@ export async function seedDatabase() {
     "Jenkins",
     "+1 (415) 555-0100",
     "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
-    now
+    now,
   );
 
   // 5. Doctor Availabilities (Monday through Friday slots)
@@ -373,11 +485,32 @@ export async function seedDatabase() {
     "Gradually taper ointment. Switch to gentle ceramide cream (e.g. CeraVe or Cetaphil). Revisit in 4 weeks if pruritus persists.",
     new Date(Date.now() - 15 * 60000).toISOString(), // Checked in 15 mins ago
     lastWeekStr,
-    now
+    now,
   );
-  insertStatusHist.run("ash-1", "apt-today-1", "REQUESTED", "Booking placed by patient via mobile app", "usr-patient-1", lastWeekStr);
-  insertStatusHist.run("ash-2", "apt-today-1", "CONFIRMED", "Confirmed automatically by clinic scheduling system", "SYSTEM", lastWeekStr);
-  insertStatusHist.run("ash-3", "apt-today-1", "CHECKED_IN", "Digital check-in completed on mobile device at reception entrance", "usr-patient-1", new Date(Date.now() - 15 * 60000).toISOString());
+  insertStatusHist.run(
+    "ash-1",
+    "apt-today-1",
+    "REQUESTED",
+    "Booking placed by patient via mobile app",
+    "usr-patient-1",
+    lastWeekStr,
+  );
+  insertStatusHist.run(
+    "ash-2",
+    "apt-today-1",
+    "CONFIRMED",
+    "Confirmed automatically by clinic scheduling system",
+    "SYSTEM",
+    lastWeekStr,
+  );
+  insertStatusHist.run(
+    "ash-3",
+    "apt-today-1",
+    "CHECKED_IN",
+    "Digital check-in completed on mobile device at reception entrance",
+    "usr-patient-1",
+    new Date(Date.now() - 15 * 60000).toISOString(),
+  );
 
   // Appointment 2: Tomorrow with Dr. Marcus Chen (Upcoming)
   insertAppt.run(
@@ -398,10 +531,24 @@ export async function seedDatabase() {
     null,
     null,
     yesterdayStr,
-    now
+    now,
   );
-  insertStatusHist.run("ash-4", "apt-tmrw-1", "REQUESTED", "Telehealth requested by patient", "usr-patient-1", yesterdayStr);
-  insertStatusHist.run("ash-5", "apt-tmrw-1", "CONFIRMED", "Telehealth link generated and doctor accepted", "usr-doc-2", yesterdayStr);
+  insertStatusHist.run(
+    "ash-4",
+    "apt-tmrw-1",
+    "REQUESTED",
+    "Telehealth requested by patient",
+    "usr-patient-1",
+    yesterdayStr,
+  );
+  insertStatusHist.run(
+    "ash-5",
+    "apt-tmrw-1",
+    "CONFIRMED",
+    "Telehealth link generated and doctor accepted",
+    "usr-doc-2",
+    yesterdayStr,
+  );
 
   // Appointment 3: Completed last week with Dr. Elena Reyes
   insertAppt.run(
@@ -422,10 +569,24 @@ export async function seedDatabase() {
     "Schedule follow-up check-in within 10-14 days.",
     lastWeekStr + "T10:48:00Z",
     new Date(Date.now() - 14 * 86400000).toISOString(),
-    lastWeekStr
+    lastWeekStr,
   );
-  insertStatusHist.run("ash-6", "apt-past-1", "REQUESTED", "Booked by patient", "usr-patient-1", new Date(Date.now() - 14 * 86400000).toISOString());
-  insertStatusHist.run("ash-7", "apt-past-1", "COMPLETED", "Consultation finalized by Dr. Elena Reyes", "usr-doc-1", lastWeekStr);
+  insertStatusHist.run(
+    "ash-6",
+    "apt-past-1",
+    "REQUESTED",
+    "Booked by patient",
+    "usr-patient-1",
+    new Date(Date.now() - 14 * 86400000).toISOString(),
+  );
+  insertStatusHist.run(
+    "ash-7",
+    "apt-past-1",
+    "COMPLETED",
+    "Consultation finalized by Dr. Elena Reyes",
+    "usr-doc-1",
+    lastWeekStr,
+  );
 
   // 7. Reviews
   const insertReview = db.prepare(`
@@ -441,7 +602,7 @@ export async function seedDatabase() {
     5,
     5,
     "Dr. Reyes was exceptionally thorough and calm. She clearly explained what was happening and gave me a clear treatment plan that started working in 2 days. The clinic space feels serene and unhurried.",
-    lastWeekStr
+    lastWeekStr,
   );
 
   // 8. Conversations & Messages
@@ -463,7 +624,7 @@ export async function seedDatabase() {
     "usr-patient-1",
     "Good morning Maria, I saw your digital check-in. Reception Area B is ready for you; I will call you in shortly.",
     now,
-    new Date(Date.now() - 10 * 60000).toISOString()
+    new Date(Date.now() - 10 * 60000).toISOString(),
   );
   insertMsg.run(
     "msg-2",
@@ -472,7 +633,7 @@ export async function seedDatabase() {
     "usr-doc-1",
     "Thank you Dr. Reyes! I am seated by Reception Area B with the hydration bar.",
     now,
-    new Date(Date.now() - 6 * 60000).toISOString()
+    new Date(Date.now() - 6 * 60000).toISOString(),
   );
 
   // 9. Notifications
@@ -489,7 +650,7 @@ export async function seedDatabase() {
     "APPOINTMENT",
     "/patient/appointments/apt-today-1",
     1,
-    new Date(Date.now() - 30 * 60000).toISOString()
+    new Date(Date.now() - 30 * 60000).toISOString(),
   );
 
   insertNotification.run(
@@ -500,7 +661,7 @@ export async function seedDatabase() {
     "DOCUMENT",
     "/patient/documents",
     0,
-    lastWeekStr
+    lastWeekStr,
   );
 
   insertNotification.run(
@@ -511,7 +672,7 @@ export async function seedDatabase() {
     "APPOINTMENT",
     "/doctor/workspace/apt-today-1",
     0,
-    new Date(Date.now() - 15 * 60000).toISOString()
+    new Date(Date.now() - 15 * 60000).toISOString(),
   );
 
   // 10. Patient Documents
@@ -527,7 +688,7 @@ export async function seedDatabase() {
     "Dermatology Visit Summary & Care Plan",
     "VISIT_SUMMARY",
     "Clinical assessment for localized dermatitis. Desonide 0.05% prescription issued. Follow-up recommended in 2-4 weeks. Patient instructed on barrier restoration and non-comedogenic emollients.",
-    lastWeekStr
+    lastWeekStr,
   );
 
   insertDoc.run(
@@ -537,7 +698,7 @@ export async function seedDatabase() {
     "Official e-Prescription — Desonide 0.05% Ointment",
     "PRESCRIPTION",
     "Rx #991048-CA | Desonide 0.05% Ointment | Sig: Apply thin film to affected areas BID x14d | Refills: 1 | Prescriber: Dr. Elena Reyes, MD (CA-MD-892147)",
-    lastWeekStr
+    lastWeekStr,
   );
 
   // 11. Saved Items
@@ -562,7 +723,7 @@ export async function seedDatabase() {
     "Morning (09:00 - 12:00)",
     "Prefer earlier cancellation for routine cardiology check-up.",
     "ACTIVE",
-    now
+    now,
   );
 
   // 13. Audit Logs
@@ -571,9 +732,36 @@ export async function seedDatabase() {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  insertAudit.run("aud-1", "usr-admin-1", "Sarah Jenkins", "SYSTEM_SEED", "DATABASE", "Initial system seed executed with verified clinics and clinicians", "127.0.0.1", now);
-  insertAudit.run("aud-2", "usr-doc-1", "Dr. Elena Reyes", "UPDATE_AVAILABILITY", "SCHEDULE", "Updated weekday morning clinic hours for Vela Central Pavilion", "192.168.1.42", yesterdayStr);
-  insertAudit.run("aud-3", "usr-patient-1", "Maria Santos", "DIGITAL_CHECK_IN", "APPOINTMENT:apt-today-1", "Patient verified arrival and checked in remotely via PWA", "172.56.21.90", new Date(Date.now() - 15 * 60000).toISOString());
+  insertAudit.run(
+    "aud-1",
+    "usr-admin-1",
+    "Sarah Jenkins",
+    "SYSTEM_SEED",
+    "DATABASE",
+    "Initial system seed executed with verified clinics and clinicians",
+    "127.0.0.1",
+    now,
+  );
+  insertAudit.run(
+    "aud-2",
+    "usr-doc-1",
+    "Dr. Elena Reyes",
+    "UPDATE_AVAILABILITY",
+    "SCHEDULE",
+    "Updated weekday morning clinic hours for Vela Central Pavilion",
+    "192.168.1.42",
+    yesterdayStr,
+  );
+  insertAudit.run(
+    "aud-3",
+    "usr-patient-1",
+    "Maria Santos",
+    "DIGITAL_CHECK_IN",
+    "APPOINTMENT:apt-today-1",
+    "Patient verified arrival and checked in remotely via PWA",
+    "172.56.21.90",
+    new Date(Date.now() - 15 * 60000).toISOString(),
+  );
 
   console.log("Database seeded successfully!");
 }

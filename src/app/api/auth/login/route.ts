@@ -6,20 +6,38 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email ||
+      !password ||
+      email.length > 254 ||
+      password.length > 128
+    ) {
+      return NextResponse.json(
+        { error: "Email and password are required." },
+        { status: 400 },
+      );
     }
 
     const db = getDb();
-    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email.trim().toLowerCase()) as any;
+    const user = (await db
+      .prepare("SELECT * FROM users WHERE email = ?")
+      .get(email.trim().toLowerCase())) as any;
 
     if (!user) {
-      return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid email or password." },
+        { status: 401 },
+      );
     }
 
     const isMatch = verifyPassword(password, user.password_hash);
     if (!isMatch) {
-      return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid email or password." },
+        { status: 401 },
+      );
     }
 
     await createSession(user.id);
@@ -43,6 +61,9 @@ export async function POST(request: Request) {
       redirectUrl,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Authentication error." }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Authentication error." },
+      { status: 500 },
+    );
   }
 }

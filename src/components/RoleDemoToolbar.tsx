@@ -2,7 +2,14 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { UserCheck, Stethoscope, Shield, Globe, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  UserCheck,
+  Stethoscope,
+  Shield,
+  Globe,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
 export default function RoleDemoToolbar() {
   const router = useRouter();
@@ -10,7 +17,11 @@ export default function RoleDemoToolbar() {
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(true); // Default collapsed to stay unobtrusive
 
-  const switchAccount = async (email: string, password: string, targetPath: string) => {
+  const switchAccount = async (
+    email: string,
+    password: string,
+    targetPath: string,
+  ) => {
     try {
       setLoading(true);
       const res = await fetch("/api/auth/login", {
@@ -44,10 +55,10 @@ export default function RoleDemoToolbar() {
   const currentRole = pathname.startsWith("/patient")
     ? "Patient (Maria)"
     : pathname.startsWith("/doctor")
-    ? "Doctor (Dr. Reyes)"
-    : pathname.startsWith("/admin")
-    ? "Admin (Ops)"
-    : "Public Guest";
+      ? "Doctor (Dr. Reyes)"
+      : pathname.startsWith("/admin")
+        ? "Admin (Ops)"
+        : "Public Guest";
 
   return (
     <aside
@@ -86,7 +97,13 @@ export default function RoleDemoToolbar() {
                 onClick={() => logout()}
                 disabled={loading}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
-                  pathname === "/" || pathname.startsWith("/find-care") || pathname.startsWith("/doctors") || pathname.startsWith("/clinics") || pathname.startsWith("/services") || pathname.startsWith("/telehealth") || pathname.startsWith("/care-finder")
+                  pathname === "/" ||
+                  pathname.startsWith("/find-care") ||
+                  pathname.startsWith("/doctors") ||
+                  pathname.startsWith("/clinics") ||
+                  pathname.startsWith("/services") ||
+                  pathname.startsWith("/telehealth") ||
+                  pathname.startsWith("/care-finder")
                     ? "bg-[#526A5B] text-white font-semibold"
                     : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
                 }`}
@@ -96,7 +113,13 @@ export default function RoleDemoToolbar() {
               </button>
 
               <button
-                onClick={() => switchAccount("patient@velahealth.com", "PatientPass123!", "/patient")}
+                onClick={() =>
+                  switchAccount(
+                    "patient@velahealth.com",
+                    "PatientPass123!",
+                    "/patient",
+                  )
+                }
                 disabled={loading}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
                   pathname.startsWith("/patient")
@@ -109,7 +132,13 @@ export default function RoleDemoToolbar() {
               </button>
 
               <button
-                onClick={() => switchAccount("doctor.reyes@velahealth.com", "DoctorPass123!", "/doctor")}
+                onClick={() =>
+                  switchAccount(
+                    "doctor.reyes@velahealth.com",
+                    "DoctorPass123!",
+                    "/doctor",
+                  )
+                }
                 disabled={loading}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
                   pathname.startsWith("/doctor")
@@ -122,7 +151,13 @@ export default function RoleDemoToolbar() {
               </button>
 
               <button
-                onClick={() => switchAccount("admin@velahealth.com", "AdminPass123!", "/admin")}
+                onClick={() =>
+                  switchAccount(
+                    "admin@velahealth.com",
+                    "AdminPass123!",
+                    "/admin",
+                  )
+                }
                 disabled={loading}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-left ${
                   pathname.startsWith("/admin")

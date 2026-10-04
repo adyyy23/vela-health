@@ -34,13 +34,17 @@ export default function CareMap({
         center: center,
         zoom: zoom,
         zoomControl: false,
-        attributionControl: false,
+        attributionControl: true,
       });
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19,
-        subdomains: "abcd",
-      }).addTo(map);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          maxZoom: 19,
+          subdomains: "abcd",
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        },
+      ).addTo(map);
 
       // Add a clean top-right subtle zoom control
       L.control.zoom({ position: "topright" }).addTo(map);
@@ -73,13 +77,13 @@ export default function CareMap({
         <div class="relative group cursor-pointer transition-transform duration-200 ${isSelected ? "scale-110 z-50" : "scale-100"}">
           <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full ${
             isSelected
-              ? "bg-[#1B3629] text-white shadow-xl ring-4 ring-[#3B6B55]/40"
-              : "bg-white text-[#14221C] shadow-md border border-[#E2E8E4] hover:bg-[#F5F7F5]"
+              ? "bg-[#32151E] text-white ring-2 ring-[#993F2E]/40"
+              : "bg-white text-[#32151E] shadow-none border border-[#DCD8CE] hover:bg-white"
           }">
-            <div class="w-2.5 h-2.5 rounded-full ${isSelected ? "bg-emerald-400 animate-pulse" : "bg-[#3B6B55]"}"></div>
-            <span class="text-xs font-semibold whitespace-nowrap">${clinic.name.replace("Vela ", "")}</span>
+            <div class="w-2.5 h-2.5 rounded-full ${isSelected ? "bg-white" : "bg-[#993F2E]"}"></div>
+            <span class="text-xs font-semibold whitespace-nowrap">${clinic.name.replace("Vela ", "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!)}</span>
           </div>
-          <div class="w-2 h-2 ${isSelected ? "bg-[#1B3629]" : "bg-white"} rotate-45 mx-auto -mt-1 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}"></div>
+          <div class="w-2 h-2 ${isSelected ? "bg-[#32151E]" : "bg-white"} rotate-45 mx-auto -mt-1 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}"></div>
         </div>
       `;
 
@@ -90,13 +94,18 @@ export default function CareMap({
         iconAnchor: [60, 36],
       });
 
-      const marker = L.marker([clinic.latitude, clinic.longitude], { icon: customIcon }).addTo(map);
+      const marker = L.marker([clinic.latitude, clinic.longitude], {
+        icon: customIcon,
+      }).addTo(map);
 
       marker.on("click", () => {
         if (onSelectClinic) {
           onSelectClinic(clinic);
         }
-        map.panTo([clinic.latitude, clinic.longitude], { animate: true, duration: 0.5 });
+        map.panTo([clinic.latitude, clinic.longitude], {
+          animate: true,
+          duration: 0.5,
+        });
       });
 
       markersRef.current[clinic.id] = marker;
@@ -106,7 +115,10 @@ export default function CareMap({
     if (selectedClinicId) {
       const selected = clinics.find((c) => c.id === selectedClinicId);
       if (selected) {
-        map.panTo([selected.latitude, selected.longitude], { animate: true, duration: 0.6 });
+        map.panTo([selected.latitude, selected.longitude], {
+          animate: true,
+          duration: 0.6,
+        });
       }
     }
   }, [clinics, selectedClinicId, onSelectClinic]);

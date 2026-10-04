@@ -96,7 +96,7 @@ export interface DoctorAvailability {
   doctorId: string;
   dayOfWeek: number; // 0 = Sunday, 1 = Monday, ...
   startTime: string; // "09:00"
-  endTime: string;   // "17:00"
+  endTime: string; // "17:00"
   slotDurationMinutes: number;
   isTelehealth: boolean;
 }

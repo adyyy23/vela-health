@@ -1,77 +1,95 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { createAppointment, getAppointmentsForUser } from "@/lib/data";
-import { getAppointmentsFromSupabase, createAppointmentInSupabase } from "@/lib/supabase-data";
-import { isSupabaseConfigured } from "@/lib/supabase";
-
+import {
+  createAppointment,
+  getAppointmentsForUser,
+  getAppointmentById,
+  updateAppointmentStatus,
+} from "@/lib/data";
+import { getDb } from "@/lib/db";
 export async function GET() {
-  try {
-    const user = await getSessionUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (isSupabaseConfigured()) {
-      const supaApts = await getAppointmentsFromSupabase(user.id, user.role);
-      if (supaApts) {
-        return NextResponse.json({ appointments: supaApts });
-      }
-    }
-
-    const appointments = getAppointmentsForUser(user.id, user.role);
-    return NextResponse.json({ appointments });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  const user = await getSessionUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return NextResponse.json(
+    { appointments: await getAppointmentsForUser(user.id, user.role) },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
 }
-
 export async function POST(request: Request) {
+  const user = await getSessionUser();
+  if (!user)
+    return NextResponse.json(
+      { error: "Please sign in to book." },
+      { status: 401 },
+    );
+  if (user.role !== "PATIENT")
+    return NextResponse.json(
+      { error: "Patient access required." },
+      { status: 403 },
+    );
   try {
-    const user = await getSessionUser();
-    if (!user) {
-      return NextResponse.json({ error: "Please log in to book an appointment." }, { status: 401 });
-    }
-
     const body = await request.json();
-    const { doctorId, clinicId, serviceId, scheduledDate, scheduledTime, consultationType, reason } = body;
-
-    if (!doctorId || !clinicId || !scheduledDate || !scheduledTime || !consultationType || !reason) {
-      return NextResponse.json({ error: "All booking fields are required." }, { status: 400 });
-    }
-
-    if (isSupabaseConfigured()) {
-      const supaResult = await createAppointmentInSupabase({
-        patientId: user.id,
-        doctorId,
-        clinicId,
-        serviceId,
-        scheduledDate,
-        scheduledTime,
-        consultationType,
-        reason,
-      });
-      if (supaResult.success) {
-        return NextResponse.json(supaResult);
-      }
-    }
-
-    const result = createAppointment({
-      patientId: user.id,
-      doctorId,
-      clinicId,
-      serviceId,
-      scheduledDate,
-      scheduledTime,
-      consultationType,
-      reason,
-    });
-
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true, appointmentId: result.appointmentId });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const required = [
+      "doctorId",
+      "clinicId",
+      "scheduledDate",
+      "scheduledTime",
+      "consultationType",
+      "reason",
+    ];
+    if (
+      required.some((k) => typeof body[k] !== "string" || !body[k].trim()) ||
+      body.reason.length > 2000
+    )
+      return NextResponse.json(
+        { error: "Complete all required booking fields." },
+        { status: 400 },
+      );
+    const result = await getDb()
+      .transaction(async () => {
+        const previous = body.rescheduleId
+          ? await getAppointmentById(body.rescheduleId)
+          : null;
+        if (
+          body.rescheduleId &&
+          (!previous ||
+            previous.patientId !== user.id ||
+            !["CONFIRMED", "UPCOMING", "REQUESTED", "RESCHEDULED"].includes(
+              previous.status,
+            ))
+        )
+          return {
+            success: false,
+            error: "This appointment cannot be rescheduled.",
+          };
+        const created = await createAppointment({
+          ...body,
+          patientId: user.id,
+        });
+        if (created.success && previous)
+          await updateAppointmentStatus(
+            previous.id,
+            "CANCELLED",
+            user.id,
+            `Rescheduled to ${created.appointmentId}`,
+          );
+        return created;
+      })
+      .immediate();
+    if (!result.success) return NextResponse.json(result, { status: 400 });
+    return NextResponse.json(
+      {
+        ...result,
+        referenceNo: (await getAppointmentById(result.appointmentId!))
+          ?.referenceNo,
+      },
+      { status: 201 },
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to book. Please retry or choose another time." },
+      { status: 500 },
+    );
   }
 }

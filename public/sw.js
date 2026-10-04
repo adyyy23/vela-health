@@ -1,15 +1,15 @@
-const CACHE_NAME = "vela-health-v2";
+const CACHE_NAME = "vela-health-v3";
 const ASSETS_TO_CACHE = [
   "/manifest.json",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    })
+    }),
   );
   self.skipWaiting();
 });
@@ -22,9 +22,9 @@ self.addEventListener("activate", (event) => {
           if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
-        })
+        }),
       );
-    })
+    }),
   );
   self.clients.claim();
 });
@@ -46,8 +46,14 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match("/") || new Response("Offline", { status: 503 });
-      })
+        return new Response(
+          "You are offline. Reconnect to access your care securely.",
+          {
+            status: 503,
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+          },
+        );
+      }),
     );
     return;
   }

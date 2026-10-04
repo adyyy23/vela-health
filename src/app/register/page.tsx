@@ -42,14 +42,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F5F7F5] text-vela-ink">
+    <div
+      id="main-content"
+      className="min-h-screen flex flex-col items-center justify-center p-4 bg-white text-vela-ink"
+    >
       <div className="mb-6">
         <Link href="/">
           <VelaLogo size="lg" />
         </Link>
       </div>
 
-      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E2E8E4] shadow-sm max-w-md w-full">
+      <div className="bg-white rounded-surface p-6 sm:p-10 border border-[#DCD8CE] shadow-vela-subtle max-w-md w-full">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-extrabold text-vela-ink tracking-tight">
             Create Patient Account
@@ -60,7 +63,7 @@ export default function RegisterPage() {
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-card bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
@@ -69,78 +72,116 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-3.5">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">First Name</label>
+              <label
+                htmlFor="firstName"
+                className="text-[10px] font-bold uppercase text-vela-muted block mb-1"
+              >
+                First Name
+              </label>
               <input
                 type="text"
                 required
+                id="firstName"
+                autoComplete="given-name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="Maria"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F3EE] border border-[#DCD8CE] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Last Name</label>
+              <label
+                htmlFor="lastName"
+                className="text-[10px] font-bold uppercase text-vela-muted block mb-1"
+              >
+                Last Name
+              </label>
               <input
                 type="text"
                 required
+                id="lastName"
+                autoComplete="family-name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Santos"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F3EE] border border-[#DCD8CE] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Email Address</label>
+            <label
+              htmlFor="email"
+              className="text-[10px] font-bold uppercase text-vela-muted block mb-1"
+            >
+              Email Address
+            </label>
             <input
               type="email"
               required
+              id="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="maria.santos@example.com"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F3EE] border border-[#DCD8CE] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Phone Number</label>
+            <label
+              htmlFor="phone"
+              className="text-[10px] font-bold uppercase text-vela-muted block mb-1"
+            >
+              Phone Number
+            </label>
             <input
               type="tel"
+              id="phone"
+              autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+1 (415) 555-0142"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F3EE] border border-[#DCD8CE] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase text-vela-muted block mb-1">Create Password</label>
+            <label
+              htmlFor="password"
+              className="text-[10px] font-bold uppercase text-vela-muted block mb-1"
+            >
+              Create Password (at least 12 characters)
+            </label>
             <input
               type="password"
               required
-              minLength={6}
+              minLength={12}
+              id="password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F9F7] border border-[#E2E8E4] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F3EE] border border-[#DCD8CE] text-xs text-vela-ink focus:outline-none focus:ring-2 focus:ring-vela-sage"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 mt-2"
+            className="w-full py-3 rounded-card bg-vela-sage hover:bg-vela-sageDark text-white font-bold text-xs shadow-vela-subtle transition flex items-center justify-center gap-2 mt-2"
           >
             {loading ? "Creating Account..." : "Register Account"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-[#E2E8E4] text-center text-xs text-vela-muted">
+        <div className="mt-6 pt-4 border-t border-[#DCD8CE] text-center text-xs text-vela-muted">
           <span>Already registered? </span>
-          <Link href="/login" className="font-bold text-vela-sage hover:text-vela-sageDark">
+          <Link
+            href="/login"
+            className="font-bold text-vela-sage hover:text-vela-sageDark"
+          >
             Sign In
           </Link>
         </div>
